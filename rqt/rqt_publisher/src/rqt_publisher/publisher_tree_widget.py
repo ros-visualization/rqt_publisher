@@ -33,20 +33,20 @@
 import roslib
 roslib.load_manifest('rqt_publisher')
 
-import qt_gui.QtBindingHelper #@UnusedImport
+import qt_gui.qt_binding_helper #@UnusedImport
 from QtCore import Signal, Slot
 from QtGui import QAction, QIcon
 
-from rqt_publisher import PublisherTreeModel
-from rqt_py_common import MessageTreeWidget
+from .publisher_tree_model import PublisherTreeModel
+from rqt_py_common.message_tree_widget import MessageTreeWidget
 
-class PublisherTreeWidget(MessageTreeWidget.MessageTreeWidget):
+class PublisherTreeWidget(MessageTreeWidget):
     remove_publisher = Signal(int)
     publish_once = Signal(int)
 
     def __init__(self, parent=None):
         super(PublisherTreeWidget, self).__init__(parent)
-        self.setModel(PublisherTreeModel.PublisherTreeModel(self))
+        self.setModel(PublisherTreeModel(self))
         self._action_remove_publisher = QAction(QIcon.fromTheme('remove'), 'Remove Selected', self)
         self._action_remove_publisher.triggered.connect(self._handle_action_remove_publisher)
         self._action_publish_once = QAction(QIcon.fromTheme('media-playback-start'), 'Publish Selected Once', self)

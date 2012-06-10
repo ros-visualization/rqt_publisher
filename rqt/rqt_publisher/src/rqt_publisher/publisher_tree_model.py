@@ -35,13 +35,13 @@ import roslib
 roslib.load_manifest('rqt_publisher')
 import rospy
 
-import qt_gui.QtBindingHelper #@UnusedImport
+import qt_gui.qt_binding_helper #@UnusedImport
 from QtCore import Signal, qDebug, Qt
 from QtGui import QStandardItem
 
-import rqt_py_common.MessageTreeModel
+from rqt_py_common.message_tree_model import MessageTreeModel
 
-class PublisherTreeModel(rqt_py_common.MessageTreeModel.MessageTreeModel):
+class PublisherTreeModel(MessageTreeModel):
     _column_names = ['topic', 'type', 'rate', 'enabled', 'expression']
     item_value_changed = Signal(int, str, str, str, object)
 
