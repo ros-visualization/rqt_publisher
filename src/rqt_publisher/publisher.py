@@ -59,7 +59,8 @@ class Publisher(Plugin):
         self._widget.remove_publisher.connect(self.remove_publisher)
         self._widget.clean_up_publishers.connect(self.clean_up_publishers)
         if context.serial_number() > 1:
-            self._widget.setWindowTitle(self._widget.windowTitle() + (' (%d)' % context.serial_number()))
+            self._widget.setWindowTitle(
+                self._widget.windowTitle() + (' (%d)' % context.serial_number()))
 
         # create context for the expression eval statement
         self._eval_locals = {'i': 0}
@@ -95,15 +96,18 @@ class Publisher(Plugin):
         publisher_info['enabled'] = publisher_info.get('enabled', False)
         publisher_info['expressions'] = publisher_info.get('expressions', {})
 
-        publisher_info['message_instance'] = self._create_message_instance(publisher_info['type_name'])
+        publisher_info['message_instance'] = self._create_message_instance(
+            publisher_info['type_name'])
         if publisher_info['message_instance'] is None:
             return
 
         # create publisher and timer
         try:
-            publisher_info['publisher'] = rospy.Publisher(publisher_info['topic_name'], type(publisher_info['message_instance']), queue_size=100)
+            publisher_info['publisher'] = rospy.Publisher(
+                publisher_info['topic_name'], type(publisher_info['message_instance']), queue_size=100)
         except TypeError:
-            publisher_info['publisher'] = rospy.Publisher(publisher_info['topic_name'], type(publisher_info['message_instance']))
+            publisher_info['publisher'] = rospy.Publisher(
+                publisher_info['topic_name'], type(publisher_info['message_instance']))
         publisher_info['timer'] = QTimer(self)
 
         # add publisher info to _publishers dict and create signal mapping
@@ -125,7 +129,9 @@ class Publisher(Plugin):
 
     def _change_publisher_topic(self, publisher_info, topic_name, new_value):
         publisher_info['enabled'] = (new_value and new_value.lower() in ['1', 'true', 'yes'])
-        #qDebug('Publisher._change_publisher_enabled(): %s enabled: %s' % (publisher_info['topic_name'], publisher_info['enabled']))
+        # qDebug(
+        #   'Publisher._change_publisher_enabled(): %s enabled: %s' %
+        #   (publisher_info['topic_name'], publisher_info['enabled']))
         if publisher_info['enabled'] and publisher_info['rate'] > 0:
             publisher_info['timer'].start(int(1000.0 / publisher_info['rate']))
         else:
@@ -161,10 +167,13 @@ class Publisher(Plugin):
         try:
             rate = float(new_value)
         except Exception:
-            qWarning('Publisher._change_publisher_rate(): could not parse rate value: %s' % (new_value))
+            qWarning('Publisher._change_publisher_rate(): could not parse rate value: %s' %
+                     (new_value))
         else:
             publisher_info['rate'] = rate
-            #qDebug('Publisher._change_publisher_rate(): %s rate changed: %fHz' % (publisher_info['topic_name'], publisher_info['rate']))
+            # qDebug(
+            #   'Publisher._change_publisher_rate(): %s rate changed: %fHz' %
+            #   (publisher_info['topic_name'], publisher_info['rate']))
             publisher_info['timer'].stop()
             if publisher_info['enabled'] and publisher_info['rate'] > 0:
                 publisher_info['timer'].start(int(1000.0 / publisher_info['rate']))
@@ -176,7 +185,9 @@ class Publisher(Plugin):
         if len(expression) == 0:
             if topic_name in publisher_info['expressions']:
                 del publisher_info['expressions'][topic_name]
-                #qDebug('Publisher._change_publisher_expression(): removed expression for: %s' % (topic_name))
+                # qDebug(
+                #   'Publisher._change_publisher_expression(): removed expression'
+                #   'for: %s' % (topic_name))
         else:
             slot_type, is_array = get_field_type(topic_name)
             if is_array:
@@ -190,8 +201,11 @@ class Publisher(Plugin):
             if success:
                 old_expression = publisher_info['expressions'].get(topic_name, None)
                 publisher_info['expressions'][topic_name] = expression
-                #print 'Publisher._change_publisher_expression(): topic: %s, type: %s, expression: %s' % (topic_name, slot_type, new_value)
-                self._fill_message_slots(publisher_info['message_instance'], publisher_info['topic_name'], publisher_info['expressions'], publisher_info['counter'])
+                # print('Publisher._change_publisher_expression(): topic: %s, type: %s,'
+                #   'expression: %s') % (topic_name, slot_type, new_value)
+                self._fill_message_slots(
+                    publisher_info['message_instance'], publisher_info['topic_name'],
+                    publisher_info['expressions'], publisher_info['counter'])
                 try:
                     publisher_info['message_instance']._check_types()
                 except Exception as e:
@@ -246,14 +260,16 @@ class Publisher(Plugin):
             if successful_eval:
                 value = str(value)
             else:
-                # for string slots just convert the expression to str, if it did not evaluate successfully
+                # for string slots just convert the expression to str, if it did not
+                # evaluate successfully
                 value = str(expression)
             successful_eval = True
 
         elif successful_eval:
             type_set = set((slot_type, type(value)))
-            # check if value's type and slot_type belong to the same type group, i.e. array types, numeric types
-            # and if they do, make sure values's type is converted to the exact slot_type
+            # check if value's type and slot_type belong to the same type group, i.e. array types,
+            # numeric types and if they do, make sure values's type is converted to the exact
+            # slot_type
             if type_set <= set((list, tuple)) or type_set <= set((int, float)):
                 # convert to the right type
                 value = slot_type(value)
@@ -261,7 +277,9 @@ class Publisher(Plugin):
         if successful_eval and isinstance(value, slot_type):
             return True, value
         else:
-            qWarning('Publisher._evaluate_expression(): failed to evaluate expression: "%s" as Python type "%s"' % (expression, slot_type.__name__))
+            qWarning(
+                'Publisher._evaluate_expression(): failed to evaluate expression: "%s" as '
+                'Python type "%s"' % (expression, slot_type.__name__))
 
         return False, None
 
@@ -283,13 +301,15 @@ class Publisher(Plugin):
         # if no expression exists for this topic_name, continue with it's child slots
         elif hasattr(message, '__slots__'):
             for slot_name in message.__slots__:
-                value = self._fill_message_slots(getattr(message, slot_name), topic_name + '/' + slot_name, expressions, counter)
+                value = self._fill_message_slots(
+                    getattr(message, slot_name), topic_name + '/' + slot_name, expressions, counter)
                 if value is not None:
                     setattr(message, slot_name, value)
 
         elif type(message) in (list, tuple) and (len(message) > 0):
             for index, slot in enumerate(message):
-                value = self._fill_message_slots(slot, topic_name + '[%d]' % index, expressions, counter)
+                value = self._fill_message_slots(
+                    slot, topic_name + '[%d]' % index, expressions, counter)
                 # this deals with primitive-type arrays
                 if not hasattr(message[0], '__slots__') and value is not None:
                     message[index] = value
@@ -301,7 +321,11 @@ class Publisher(Plugin):
         publisher_info = self._publishers.get(publisher_id, None)
         if publisher_info is not None:
             publisher_info['counter'] += 1
-            self._fill_message_slots(publisher_info['message_instance'], publisher_info['topic_name'], publisher_info['expressions'], publisher_info['counter'])
+            self._fill_message_slots(
+                publisher_info['message_instance'],
+                publisher_info['topic_name'],
+                publisher_info['expressions'],
+                publisher_info['counter'])
             publisher_info['publisher'].publish(publisher_info['message_instance'])
 
     @Slot(int)
