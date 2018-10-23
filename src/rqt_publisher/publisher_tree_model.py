@@ -65,7 +65,7 @@ class PublisherTreeModel(MessageTreeModel):
 
     def handle_item_changed(self, item):
         if not self._item_change_lock.acquire(False):
-            #qDebug('PublisherTreeModel.handle_item_changed(): could not acquire lock')
+            # qDebug('PublisherTreeModel.handle_item_changed(): could not acquire lock')
             return
         # lock has been acquired
         topic_name = item._path
@@ -74,9 +74,11 @@ class PublisherTreeModel(MessageTreeModel):
             new_value = str(item.checkState() == Qt.Checked)
         else:
             new_value = item.text().strip()
-        #print 'PublisherTreeModel.handle_item_changed(): %s, %s, %s' % (topic_name, column_name, new_value)
+        # print 'PublisherTreeModel.handle_item_changed(): %s, %s, %s' %
+        # (topic_name, column_name, new_value)
 
-        self.item_value_changed.emit(item._user_data['publisher_id'], topic_name, column_name, new_value, item.setText)
+        self.item_value_changed.emit(
+            item._user_data['publisher_id'], topic_name, column_name, new_value, item.setText)
 
         # release lock
         self._item_change_lock.release()
@@ -106,7 +108,8 @@ class PublisherTreeModel(MessageTreeModel):
             'top_level_row_number': top_level_row_number,
             'expressions': publisher_info['expressions'],
         }
-        top_level_row = self._recursive_create_items(parent, slot, slot_name, slot_type_name, slot_path, **kwargs)
+        top_level_row = self._recursive_create_items(
+            parent, slot, slot_name, slot_type_name, slot_path, **kwargs)
 
         # fill tree widget columns of top level item
         if publisher_info['enabled']:
@@ -115,13 +118,23 @@ class PublisherTreeModel(MessageTreeModel):
 
     def _get_data_items_for_path(self, slot_name, slot_type_name, slot_path, **kwargs):
         if slot_name.startswith('/'):
-            return (CheckableItem(slot_name), ReadonlyItem(slot_type_name), QStandardItem(''), ReadonlyItem(''))
+            return (CheckableItem(slot_name),
+                    ReadonlyItem(slot_type_name),
+                    QStandardItem(''),
+                    ReadonlyItem(''))
         expression_item = QStandardItem('')
-        expression_item.setToolTip('enter valid Python expression here, using "i" as counter and functions from math, random and time modules')
-        return (ReadonlyItem(slot_name), QStandardItem(slot_type_name), ReadonlyItem(''), expression_item)
+        expression_item.setToolTip(
+            'enter valid Python expression here, using "i" as counter and functions from math, '
+            'random and time modules')
+        return (ReadonlyItem(slot_name),
+                QStandardItem(slot_type_name),
+                ReadonlyItem(''),
+                expression_item)
 
-    def _recursive_create_items(self, parent, slot, slot_name, slot_type_name, slot_path, expressions={}, **kwargs):
-        row, is_leaf_node = super(PublisherTreeModel, self)._recursive_create_items(parent, slot, slot_name, slot_type_name, slot_path, expressions=expressions, **kwargs)
+    def _recursive_create_items(
+            self, parent, slot, slot_name, slot_type_name, slot_path, expressions={}, **kwargs):
+        row, is_leaf_node = super(PublisherTreeModel, self)._recursive_create_items(
+            parent, slot, slot_name, slot_type_name, slot_path, expressions=expressions, **kwargs)
         if is_leaf_node:
             expression_text = expressions.get(slot_path, repr(slot))
             row[self._column_index['expression']].setText(expression_text)
@@ -131,7 +144,12 @@ class PublisherTreeModel(MessageTreeModel):
         flags = super(PublisherTreeModel, self).flags(index)
         if (
             index.column() == self._column_index['expression'] and
-            index.model().data(index.model().index(index.row(), self._column_index['type'], index.parent()), Qt.DisplayRole) == 'bool'
+            index.model().data(
+                index.model().index(
+                    index.row(),
+                    self._column_index['type'],
+                    index.parent()),
+                Qt.DisplayRole) == 'bool'
         ):
             flags |= Qt.ItemIsUserCheckable
         return flags
@@ -139,10 +157,20 @@ class PublisherTreeModel(MessageTreeModel):
     def data(self, index, role):
         if (
             index.column() == self._column_index['expression'] and
-            index.model().data(index.model().index(index.row(), self._column_index['type'], index.parent()), Qt.DisplayRole) == 'bool'
+            index.model().data(
+                index.model().index(
+                    index.row(),
+                    self._column_index['type'],
+                    index.parent()),
+                Qt.DisplayRole) == 'bool'
         ):
             if role == Qt.CheckStateRole:
-                value = index.model().data(index.model().index(index.row(), index.column(), index.parent()), Qt.DisplayRole)
+                value = \
+                    index.model().data(
+                        index.model().index(
+                            index.row(), index.column(), index.parent()),
+                        Qt.DisplayRole)
+
                 if value == 'True':
                     return Qt.Checked
                 if value == 'False':
@@ -153,7 +181,10 @@ class PublisherTreeModel(MessageTreeModel):
     def setData(self, index, value, role):
         if (
             index.column() == index.column() == self._column_index['expression'] and
-            index.model().data(index.model().index(index.row(), self._column_index['type'], index.parent()), Qt.DisplayRole) == 'bool'
+            index.model().data(
+                index.model().index(
+                    index.row(), self._column_index['type'], index.parent()),
+                Qt.DisplayRole) == 'bool'
         ):
             if role == Qt.CheckStateRole:
                 value = str(value == Qt.Checked)

@@ -63,7 +63,8 @@ class PublisherWidget(QWidget):
 
         self._rospack = rospkg.RosPack()
         ui_file = os.path.join(self._rospack.get_path('rqt_publisher'), 'resource', 'Publisher.ui')
-        loadUi(ui_file, self, {'ExtendedComboBox': ExtendedComboBox, 'PublisherTreeWidget': PublisherTreeWidget})
+        loadUi(ui_file, self,
+               {'ExtendedComboBox': ExtendedComboBox, 'PublisherTreeWidget': PublisherTreeWidget})
         self.refresh_button.setIcon(QIcon.fromTheme('view-refresh'))
         self.refresh_button.clicked.connect(self.refresh_combo_boxes)
         self.add_publisher_button.setIcon(QIcon.fromTheme('list-add'))
@@ -75,7 +76,8 @@ class PublisherWidget(QWidget):
         self.publisher_tree_widget.model().item_value_changed.connect(self.change_publisher)
         self.publisher_tree_widget.remove_publisher.connect(self.remove_publisher)
         self.publisher_tree_widget.publish_once.connect(self.publish_once)
-        self.remove_publisher_button.clicked.connect(self.publisher_tree_widget.remove_selected_publishers)
+        self.remove_publisher_button.clicked.connect(
+            self.publisher_tree_widget.remove_selected_publishers)
         self.clear_button.clicked.connect(self.clean_up_publishers)
 
     def shutdown_plugin(self):
@@ -96,7 +98,9 @@ class PublisherWidget(QWidget):
         message_type_names = []
         try:
             # this only works on fuerte and up
-            packages = sorted([pkg_tuple[0] for pkg_tuple in rosmsg.iterate_packages(self._rospack, rosmsg.MODE_MSG)])
+            packages = sorted(
+                [pkg_tuple[0] for pkg_tuple in
+                    rosmsg.iterate_packages(self._rospack, rosmsg.MODE_MSG)])
         except:
             # this works up to electric
             packages = sorted(rosmsg.list_packages())
