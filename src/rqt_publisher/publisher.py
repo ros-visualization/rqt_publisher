@@ -31,18 +31,17 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from __future__ import division
+import importlib
 import math
 import random
 import time
 
 from python_qt_binding.QtCore import Slot, QSignalMapper, QTimer, qWarning
 
-import roslib
-import rospy
-import genpy
+import rclpy
 from rqt_gui_py.plugin import Plugin
 from .publisher_widget import PublisherWidget
-from rqt_py_common.topic_helpers import get_field_type
+from rqt_py_common.topic_helpers import get_message_class, get_property_type
 
 
 class Publisher(Plugin):
@@ -51,8 +50,10 @@ class Publisher(Plugin):
         super(Publisher, self).__init__(context)
         self.setObjectName('Publisher')
 
+        self._node = context._node
+
         # create widget
-        self._widget = PublisherWidget()
+        self._widget = PublisherWidget(self._node)
         self._widget.add_publisher.connect(self.add_publisher)
         self._widget.change_publisher.connect(self.change_publisher)
         self._widget.publish_once.connect(self.publish_once)
@@ -66,7 +67,6 @@ class Publisher(Plugin):
         self._eval_locals = {'i': 0}
         for module in (math, random, time):
             self._eval_locals.update(module.__dict__)
-        self._eval_locals['genpy'] = genpy
         del self._eval_locals['__name__']
         del self._eval_locals['__doc__']
 
@@ -101,13 +101,21 @@ class Publisher(Plugin):
         if publisher_info['message_instance'] is None:
             return
 
-        # create publisher and timer
+        # Following code taken from
+        # https://github.com/ros2/ros2cli/blob/master/ros2topic/ros2topic/verb/pub.py
+
         try:
-            publisher_info['publisher'] = rospy.Publisher(
-                publisher_info['topic_name'], type(publisher_info['message_instance']), queue_size=100)
-        except TypeError:
-            publisher_info['publisher'] = rospy.Publisher(
-                publisher_info['topic_name'], type(publisher_info['message_instance']))
+            package_name, message_name = publisher_info['type_name'].split('/', 2)
+            if not package_name or not message_name:
+                raise ValueError()
+        except ValueError:
+            raise RuntimeError('The passed message type is invalid')
+        module = importlib.import_module(package_name + '.msg')
+        msg_module = getattr(module, message_name)
+
+        # create publisher and timer
+        publisher_info['publisher'] = self._node.create_publisher(
+            msg_module, publisher_info['topic_name'])
         publisher_info['timer'] = QTimer(self)
 
         # add publisher info to _publishers dict and create signal mapping
@@ -116,7 +124,6 @@ class Publisher(Plugin):
         publisher_info['timer'].timeout.connect(self._timeout_mapper.map)
         if publisher_info['enabled'] and publisher_info['rate'] > 0:
             publisher_info['timer'].start(int(1000.0 / publisher_info['rate']))
-
         self._widget.publisher_tree_widget.model().add_publisher(publisher_info)
 
     @Slot(int, str, str, str, object)
@@ -189,7 +196,13 @@ class Publisher(Plugin):
                 #   'Publisher._change_publisher_expression(): removed expression'
                 #   'for: %s' % (topic_name))
         else:
-            slot_type, is_array = get_field_type(topic_name)
+            # Strip topic name from the full topic path
+            slot_path = topic_name.replace(publisher_info['topic_name'], '', 1)
+
+            # Get the property type from the message class
+            slot_type, is_array = \
+                get_property_type(publisher_info['message_instance'].__class__, slot_path)
+
             if is_array:
                 slot_type = list
             # strip possible trailing error message from expression
@@ -201,15 +214,12 @@ class Publisher(Plugin):
             if success:
                 old_expression = publisher_info['expressions'].get(topic_name, None)
                 publisher_info['expressions'][topic_name] = expression
-                # print('Publisher._change_publisher_expression(): topic: %s, type: %s,'
-                #   'expression: %s') % (topic_name, slot_type, new_value)
-                self._fill_message_slots(
-                    publisher_info['message_instance'], publisher_info['topic_name'],
-                    publisher_info['expressions'], publisher_info['counter'])
                 try:
-                    publisher_info['message_instance']._check_types()
+                    self._fill_message_slots(
+                        publisher_info['message_instance'], publisher_info['topic_name'],
+                        publisher_info['expressions'], publisher_info['counter'])
+
                 except Exception as e:
-                    print('serialization error: %s' % e)
                     if old_expression is not None:
                         publisher_info['expressions'][topic_name] = old_expression
                     else:
@@ -217,7 +227,8 @@ class Publisher(Plugin):
                     return '%s %s: %s' % (expression, error_prefix, e)
                 return expression
             else:
-                return '%s %s evaluating as "%s"' % (expression, error_prefix, slot_type.__name__)
+                return '%s %s evaluating as "%s"' % (
+                    expression, error_prefix, slot_type.__name__)
 
     def _extract_array_info(self, type_str):
         array_size = None
@@ -234,9 +245,14 @@ class Publisher(Plugin):
     def _create_message_instance(self, type_str):
         base_type_str, array_size = self._extract_array_info(type_str)
 
-        base_message_type = roslib.message.get_message_class(base_type_str)
+        try:
+            base_message_type = get_message_class(base_type_str)
+        except LookupError as e:
+            qWarning("Creating message type {} failed. Please check your spelling and that the "
+                     "message package has been built\n{}".format(base_type_str, e))
+            return None
+
         if base_message_type is None:
-            print('Could not create message of type "%s".' % base_type_str)
             return None
 
         if array_size is not None:
@@ -249,13 +265,13 @@ class Publisher(Plugin):
 
     def _evaluate_expression(self, expression, slot_type):
         successful_eval = True
-
         try:
             # try to evaluate expression
             value = eval(expression, {}, self._eval_locals)
-        except Exception:
+        except Exception as e:
+            qWarning('Python eval failed for expression "{}"'.format(expression) +
+                     ' with an exception "{}"'.format(e))
             successful_eval = False
-
         if slot_type is str:
             if successful_eval:
                 value = str(value)
@@ -277,10 +293,9 @@ class Publisher(Plugin):
         if successful_eval and isinstance(value, slot_type):
             return True, value
         else:
-            qWarning(
-                'Publisher._evaluate_expression(): failed to evaluate expression: "%s" as '
-                'Python type "%s"' % (expression, slot_type.__name__))
-
+            qWarning('Publisher._evaluate_expression(): failed to evaluate ' +
+                     'expression: "%s" as Python type "%s"' % (
+                      expression, slot_type))
         return False, None
 
     def _fill_message_slots(self, message, topic_name, expressions, counter):
@@ -301,10 +316,12 @@ class Publisher(Plugin):
         # if no expression exists for this topic_name, continue with it's child slots
         elif hasattr(message, '__slots__'):
             for slot_name in message.__slots__:
+                property_name = get_property_type(message.__class__, slot_name)
                 value = self._fill_message_slots(
-                    getattr(message, slot_name), topic_name + '/' + slot_name, expressions, counter)
+                    getattr(message, property_name),
+                    topic_name + '/' + property_name, expressions, counter)
                 if value is not None:
-                    setattr(message, slot_name, value)
+                    setattr(message, property_name, value)
 
         elif type(message) in (list, tuple) and (len(message) > 0):
             for index, slot in enumerate(message):
@@ -333,7 +350,7 @@ class Publisher(Plugin):
         publisher_info = self._publishers.get(publisher_id, None)
         if publisher_info is not None:
             publisher_info['timer'].stop()
-            publisher_info['publisher'].unregister()
+            del publisher_info['publisher']
             del self._publishers[publisher_id]
 
     def save_settings(self, plugin_settings, instance_settings):
@@ -357,7 +374,6 @@ class Publisher(Plugin):
         self._widget.publisher_tree_widget.model().clear()
         for publisher_info in self._publishers.values():
             publisher_info['timer'].stop()
-            publisher_info['publisher'].unregister()
         self._publishers = {}
 
     def shutdown_plugin(self):
