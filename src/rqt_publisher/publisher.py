@@ -41,7 +41,8 @@ from python_qt_binding.QtCore import Slot, QSignalMapper, QTimer, qWarning
 import rclpy
 from rqt_gui_py.plugin import Plugin
 from .publisher_widget import PublisherWidget
-from rqt_py_common.topic_helpers import get_message_class, get_property_type
+from rqt_py_common.message_helpers import get_message_class
+from rqt_py_common.topic_helpers import get_slot_type
 
 
 class Publisher(Plugin):
@@ -201,7 +202,7 @@ class Publisher(Plugin):
 
             # Get the property type from the message class
             slot_type, is_array = \
-                get_property_type(publisher_info['message_instance'].__class__, slot_path)
+                get_slot_type(publisher_info['message_instance'].__class__, slot_path)
 
             if is_array:
                 slot_type = list
@@ -314,14 +315,13 @@ class Publisher(Plugin):
             return value
 
         # if no expression exists for this topic_name, continue with it's child slots
-        elif hasattr(message, '__slots__'):
-            for slot_name in message.__slots__:
-                property_name = get_property_type(message.__class__, slot_name)
+        elif hasattr(message, 'get_fields_and_field_types'):
+            for slot_name in message.get_fields_and_field_types().keys():
                 value = self._fill_message_slots(
-                    getattr(message, property_name),
-                    topic_name + '/' + property_name, expressions, counter)
+                    getattr(message, slot_name),
+                    topic_name + '/' + slot_name, expressions, counter)
                 if value is not None:
-                    setattr(message, property_name, value)
+                    setattr(message, slot_name, value)
 
         elif type(message) in (list, tuple) and (len(message) > 0):
             for index, slot in enumerate(message):

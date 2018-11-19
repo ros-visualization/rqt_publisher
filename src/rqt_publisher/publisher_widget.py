@@ -46,7 +46,7 @@ from qt_gui_py_common.worker_thread import WorkerThread
 import rclpy
 from .publisher_tree_widget import PublisherTreeWidget
 from rqt_py_common.extended_combo_box import ExtendedComboBox
-from rqt_py_common.topic_helpers import get_message_class
+from rqt_py_common.message_helpers import get_message_class
 
 
 # main class inherits from the ui window class
