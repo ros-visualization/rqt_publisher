@@ -38,7 +38,6 @@ import time
 
 from python_qt_binding.QtCore import Slot, QSignalMapper, QTimer, qWarning
 
-import rclpy
 from rqt_gui_py.plugin import Plugin
 from .publisher_widget import PublisherWidget
 from rqt_py_common.message_helpers import get_message_class
@@ -51,7 +50,7 @@ class Publisher(Plugin):
         super(Publisher, self).__init__(context)
         self.setObjectName('Publisher')
 
-        self._node = context._node
+        self._node = context.node
 
         # create widget
         self._widget = PublisherWidget(self._node)
@@ -110,7 +109,11 @@ class Publisher(Plugin):
             if not package_name or not message_name:
                 raise ValueError()
         except ValueError:
-            raise RuntimeError('The passed message type is invalid')
+            raise RuntimeError(
+                'The passed message type "{}" is invalid'.format(publisher_info['type_name']))
+
+        # Allow user to create a message instance using the fully qualified package
+        self._eval_locals[package_name] = importlib.import_module(package_name)
         module = importlib.import_module(package_name + '.msg')
         msg_module = getattr(module, message_name)
 

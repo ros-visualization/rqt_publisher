@@ -43,7 +43,6 @@ from python_qt_binding.QtWidgets import QWidget
 from qt_gui.ros_package_helper import get_package_path
 from qt_gui_py_common.worker_thread import WorkerThread
 
-import rclpy
 from .publisher_tree_widget import PublisherTreeWidget
 from rqt_py_common.extended_combo_box import ExtendedComboBox
 from rqt_py_common.message_helpers import get_message_class
@@ -101,7 +100,7 @@ class PublisherWidget(QWidget):
         https://github.com/ros2/ros2cli/blob/master/ros2msg/ros2msg/api/__init__.py
         """
         if not has_resource('packages', package_name):
-            raise LookupError('Unknown package name')
+            raise LookupError('Unknown package name "{}"'.format(package_name))
         try:
             content, _ = get_resource('rosidl_interfaces', package_name)
         except LookupError:
