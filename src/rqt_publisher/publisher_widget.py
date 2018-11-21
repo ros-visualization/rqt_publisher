@@ -33,7 +33,7 @@
 from __future__ import division
 import os
 
-from ament_index_python import get_resource, get_resources, has_resource
+from ament_index_python import get_resource, has_resource
 
 from python_qt_binding import loadUi
 from python_qt_binding.QtCore import Signal, Slot
@@ -45,7 +45,7 @@ from qt_gui_py_common.worker_thread import WorkerThread
 
 from .publisher_tree_widget import PublisherTreeWidget
 from rqt_py_common.extended_combo_box import ExtendedComboBox
-from rqt_py_common.message_helpers import get_message_class
+from rqt_py_common.message_helpers import get_message_class, get_all_message_types
 
 
 # main class inherits from the ui window class
@@ -110,27 +110,14 @@ class PublisherWidget(QWidget):
         # Only return messages in msg folder
         return [n[4:-4] for n in interface_names if n.startswith('msg/') and n.endswith('.msg')]
 
-    def _get_all_message_types(self):
-        """
-        Implementation taken from ros2cli.
-
-        https://github.com/ros2/ros2cli/blob/master/ros2msg/ros2msg/api/__init__.py
-        """
-        all_message_types = {}
-        for package_name in get_resources('rosidl_interfaces'):
-            message_types = self._get_message_types(package_name)
-            if message_types:
-                all_message_types[package_name] = message_types
-        return all_message_types
-
     # this runs in a non-gui thread, so don't access widgets here directly
     def _update_thread_run(self):
         # update type_combo_box
         message_type_names = []
-        message_types = self._get_all_message_types()
-        packages = sorted(message_types.keys())
-        for package in packages:
-            for base_type_str in message_types[package]:
+        message_types = get_all_message_types()
+        for package, message_types in message_types.items():
+            for message_type in message_types:
+                base_type_str = package + '/' + message_type
                 message_class = get_message_class(base_type_str)
                 if message_class is not None:
                     message_type_names.append(base_type_str)
