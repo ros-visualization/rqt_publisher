@@ -100,7 +100,7 @@ class PublisherTreeModel(MessageTreeModel):
         parent = self
         slot = publisher_info['message_instance']
         slot_name = publisher_info['topic_name']
-        slot_type_name = publisher_info['message_instance']._type
+        slot_type_name = publisher_info['message_instance'].__class__.__name__
         slot_path = publisher_info['topic_name']
         user_data = {'publisher_id': publisher_info['publisher_id']}
         kwargs = {

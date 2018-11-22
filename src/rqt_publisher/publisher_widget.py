@@ -33,19 +33,19 @@
 from __future__ import division
 import os
 
+from ament_index_python import get_resource, has_resource
+
 from python_qt_binding import loadUi
 from python_qt_binding.QtCore import Signal, Slot
 from python_qt_binding.QtGui import QIcon
 from python_qt_binding.QtWidgets import QWidget
 
-import roslib
-import rosmsg
-import rospkg
-import rospy
-
+from qt_gui.ros_package_helper import get_package_path
 from qt_gui_py_common.worker_thread import WorkerThread
-from rqt_py_common.extended_combo_box import ExtendedComboBox
+
 from .publisher_tree_widget import PublisherTreeWidget
+from rqt_py_common.extended_combo_box import ExtendedComboBox
+from rqt_py_common.message_helpers import get_message_class, get_all_message_types
 
 
 # main class inherits from the ui window class
@@ -56,13 +56,14 @@ class PublisherWidget(QWidget):
     remove_publisher = Signal(int)
     clean_up_publishers = Signal()
 
-    def __init__(self, parent=None):
+    def __init__(self, node, parent=None):
         super(PublisherWidget, self).__init__(parent)
+        self._node = node
         self._topic_dict = {}
         self._update_thread = WorkerThread(self._update_thread_run, self._update_finished)
 
-        self._rospack = rospkg.RosPack()
-        ui_file = os.path.join(self._rospack.get_path('rqt_publisher'), 'resource', 'Publisher.ui')
+        package_path = get_package_path('rqt_publisher')
+        ui_file = os.path.join(package_path, 'share', 'rqt_publisher', 'resource', 'Publisher.ui')
         loadUi(ui_file, self,
                {'ExtendedComboBox': ExtendedComboBox, 'PublisherTreeWidget': PublisherTreeWidget})
         self.refresh_button.setIcon(QIcon.fromTheme('view-refresh'))
@@ -92,29 +93,40 @@ class PublisherWidget(QWidget):
         self.topic_combo_box.setEditText('updating...')
         self._update_thread.start()
 
+    def _get_message_types(self, package_name):
+        """
+        Implementation taken from ros2cli.
+
+        https://github.com/ros2/ros2cli/blob/master/ros2msg/ros2msg/api/__init__.py
+        """
+        if not has_resource('packages', package_name):
+            raise LookupError('Unknown package name "{}"'.format(package_name))
+        try:
+            content, _ = get_resource('rosidl_interfaces', package_name)
+        except LookupError:
+            return []
+        interface_names = content.splitlines()
+        # TODO(dirk-thomas) this logic should come from a rosidl related package
+        # Only return messages in msg folder
+        return [n[4:-4] for n in interface_names if n.startswith('msg/') and n.endswith('.msg')]
+
     # this runs in a non-gui thread, so don't access widgets here directly
     def _update_thread_run(self):
         # update type_combo_box
         message_type_names = []
-        try:
-            # this only works on fuerte and up
-            packages = sorted(
-                [pkg_tuple[0] for pkg_tuple in
-                    rosmsg.iterate_packages(self._rospack, rosmsg.MODE_MSG)])
-        except:
-            # this works up to electric
-            packages = sorted(rosmsg.list_packages())
-        for package in packages:
-            for base_type_str in rosmsg.list_msgs(package, rospack=self._rospack):
-                message_class = roslib.message.get_message_class(base_type_str)
+        message_types = get_all_message_types()
+        for package, message_types in message_types.items():
+            for message_type in message_types:
+                base_type_str = package + '/' + message_type
+                message_class = get_message_class(base_type_str)
                 if message_class is not None:
                     message_type_names.append(base_type_str)
 
         self.type_combo_box.setItems.emit(sorted(message_type_names))
 
         # update topic_combo_box
-        _, _, topic_types = rospy.get_master().getTopicTypes()
-        self._topic_dict = dict(topic_types)
+        topic_names_and_types = self._node.get_topic_names_and_types()
+        self._topic_dict = dict(topic_names_and_types)
         self.topic_combo_box.setItems.emit(sorted(self._topic_dict.keys()))
 
     @Slot()
@@ -124,8 +136,9 @@ class PublisherWidget(QWidget):
 
     @Slot(str)
     def on_topic_combo_box_currentIndexChanged(self, topic_name):
-        if topic_name in self._topic_dict:
-            self.type_combo_box.setEditText(self._topic_dict[topic_name])
+        # More than one topic type is possible per topic, this recommends the first one
+        if topic_name in self._topic_dict and len(self._topic_dict[topic_name]) > 0:
+            self.type_combo_box.setEditText(self._topic_dict[topic_name][0])
 
     @Slot()
     def on_add_publisher_button_clicked(self):
