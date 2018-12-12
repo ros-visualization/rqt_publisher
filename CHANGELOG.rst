@@ -2,6 +2,12 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Port to ROS2 (`#2 <https://github.com/ros-visualization/rqt_publisher/issues/2>`_)
+* autopep8 (`#1 <https://github.com/ros-visualization/rqt_publisher/issues/1>`_)
+* Contributors: Mike Lautman, brawner
+
 0.4.8 (2017-04-24)
 ------------------
 
