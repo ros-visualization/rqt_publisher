@@ -2,8 +2,8 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.1 (2018-12-12)
+------------------
 * destroy publishers on removal (`#4 <https://github.com/ros-visualization/rqt_publisher/issues/4>`_)
 * Contributors: Mike Lautman
 
