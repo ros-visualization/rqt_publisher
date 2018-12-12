@@ -353,6 +353,7 @@ class Publisher(Plugin):
         publisher_info = self._publishers.get(publisher_id, None)
         if publisher_info is not None:
             publisher_info['timer'].stop()
+            self._node.destroy_publisher(publisher_info['publisher'])
             del publisher_info['publisher']
             del self._publishers[publisher_id]
 
