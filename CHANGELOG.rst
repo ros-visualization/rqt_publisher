@@ -2,6 +2,10 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix cleaning up publisher on shutdown (`#6 <https://github.com/ros-visualization/rqt_publisher/issues/6>`_)
+
 1.0.1 (2018-12-12)
 ------------------
 * destroy publishers on removal (`#4 <https://github.com/ros-visualization/rqt_publisher/issues/4>`_)
