@@ -2,6 +2,11 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Prepending node namespace to relative topics and adding validation for topic names (`#7 <https://github.com/ros-visualization/rqt_publisher/issues/7>`_)
+* Contributors: brawner
+
 1.0.2 (2018-12-12)
 ------------------
 * fix cleaning up publisher on shutdown (`#6 <https://github.com/ros-visualization/rqt_publisher/issues/6>`_)
