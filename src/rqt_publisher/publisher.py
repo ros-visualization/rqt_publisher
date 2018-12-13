@@ -378,6 +378,7 @@ class Publisher(Plugin):
         self._widget.publisher_tree_widget.model().clear()
         for publisher_info in self._publishers.values():
             publisher_info['timer'].stop()
+            self._node.destroy_publisher(publisher_info['publisher'])
         self._publishers = {}
 
     def shutdown_plugin(self):
