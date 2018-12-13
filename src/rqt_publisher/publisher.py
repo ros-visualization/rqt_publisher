@@ -38,6 +38,7 @@ import time
 
 from python_qt_binding.QtCore import Slot, QSignalMapper, QTimer, qWarning
 
+from rclpy.exceptions import InvalidTopicNameException
 from rqt_gui_py.plugin import Plugin
 from .publisher_widget import PublisherWidget
 from rqt_py_common.message_helpers import get_message_class
@@ -81,8 +82,15 @@ class Publisher(Plugin):
 
     @Slot(str, str, float, bool)
     def add_publisher(self, topic_name, type_name, rate, enabled):
+        topic_name = str(topic_name)
+        try:
+            self._node._validate_topic_or_service_name(topic_name)
+        except InvalidTopicNameException as e:
+            qWarning(str(e))
+            return
+
         publisher_info = {
-            'topic_name': str(topic_name),
+            'topic_name': topic_name,
             'type_name': str(type_name),
             'rate': float(rate),
             'enabled': bool(enabled),
@@ -115,7 +123,17 @@ class Publisher(Plugin):
         # Allow user to create a message instance using the fully qualified package
         self._eval_locals[package_name] = importlib.import_module(package_name)
         module = importlib.import_module(package_name + '.msg')
-        msg_module = getattr(module, message_name)
+
+        try:
+            msg_module = getattr(module, message_name)
+        except AttributeError as e:
+            qWarning(str(e))
+            return
+
+        # Topic name provided was relative, remap to node namespace (if it was set)
+        if not publisher_info['topic_name'].startswith('/'):
+            publisher_info['topic_name'] = \
+                self._node.get_namespace() + publisher_info['topic_name']
 
         # create publisher and timer
         publisher_info['publisher'] = self._node.create_publisher(
