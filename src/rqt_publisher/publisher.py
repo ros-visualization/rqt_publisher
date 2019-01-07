@@ -388,6 +388,10 @@ class Publisher(Plugin):
         instance_settings.set_value('publishers', repr(publisher_copies))
 
     def restore_settings(self, plugin_settings, instance_settings):
+        # If changing perspectives and rqt_publisher is already loaded, we need to clean up the
+        # previously existing publishers
+        self.clean_up_publishers()
+
         publishers = eval(instance_settings.value('publishers', '[]'))
         for publisher in publishers:
             self._add_publisher(publisher)
