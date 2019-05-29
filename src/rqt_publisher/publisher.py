@@ -39,6 +39,7 @@ import time
 from python_qt_binding.QtCore import Slot, QSignalMapper, QTimer, qWarning
 
 from rclpy.exceptions import InvalidTopicNameException
+from rclpy.qos import QoSProfile
 from rqt_gui_py.plugin import Plugin
 from .publisher_widget import PublisherWidget
 from rqt_py_common.message_helpers import get_message_class
@@ -137,7 +138,7 @@ class Publisher(Plugin):
 
         # create publisher and timer
         publisher_info['publisher'] = self._node.create_publisher(
-            msg_module, publisher_info['topic_name'])
+            msg_module, publisher_info['topic_name'], qos_profile=QoSProfile(depth=10))
         publisher_info['timer'] = QTimer(self)
 
         # add publisher info to _publishers dict and create signal mapping
