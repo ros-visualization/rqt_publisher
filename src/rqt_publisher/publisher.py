@@ -31,7 +31,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from __future__ import division
-import importlib
 import math
 import random
 import time
@@ -110,26 +109,10 @@ class Publisher(Plugin):
         if publisher_info['message_instance'] is None:
             return
 
-        # Following code taken from
-        # https://github.com/ros2/ros2cli/blob/master/ros2topic/ros2topic/verb/pub.py
-
-        try:
-            package_name, message_name = publisher_info['type_name'].split('/', 2)
-            if not package_name or not message_name:
-                raise ValueError()
-        except ValueError:
+        msg_module = get_message_class(publisher_info['type_name'])
+        if not msg_module:
             raise RuntimeError(
                 'The passed message type "{}" is invalid'.format(publisher_info['type_name']))
-
-        # Allow user to create a message instance using the fully qualified package
-        self._eval_locals[package_name] = importlib.import_module(package_name)
-        module = importlib.import_module(package_name + '.msg')
-
-        try:
-            msg_module = getattr(module, message_name)
-        except AttributeError as e:
-            qWarning(str(e))
-            return
 
         # Topic name provided was relative, remap to node namespace (if it was set)
         if not publisher_info['topic_name'].startswith('/'):
