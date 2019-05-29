@@ -138,7 +138,7 @@ class Publisher(Plugin):
 
         # create publisher and timer
         publisher_info['publisher'] = self._node.create_publisher(
-            msg_module, publisher_info['topic_name'], QoSProfile(depth=10))
+            msg_module, publisher_info['topic_name'], qos_profile=QoSProfile(depth=10))
         publisher_info['timer'] = QTimer(self)
 
         # add publisher info to _publishers dict and create signal mapping
