@@ -117,7 +117,7 @@ class PublisherWidget(QWidget):
         message_types = get_all_message_types()
         for package, message_types in message_types.items():
             for message_type in message_types:
-                base_type_str = package + '/' + message_type
+                base_type_str = package + '/msg/' + message_type
                 message_class = get_message_class(base_type_str)
                 if message_class is not None:
                     message_type_names.append(base_type_str)
