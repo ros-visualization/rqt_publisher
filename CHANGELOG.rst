@@ -2,6 +2,10 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix setting expressions on sequence items (`#16 <https://github.com/ros-visualization/rqt_publisher/issues/16>`_)
+
 1.0.3 (2018-12-13)
 ------------------
 * Prepending node namespace to relative topics and adding validation for topic names (`#7 <https://github.com/ros-visualization/rqt_publisher/issues/7>`_)
