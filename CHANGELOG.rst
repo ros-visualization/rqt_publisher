@@ -2,8 +2,8 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.0 (2019-10-03)
+------------------
 * fix setting expressions on sequence items (`#16 <https://github.com/ros-visualization/rqt_publisher/issues/16>`_)
 
 1.0.3 (2018-12-13)
