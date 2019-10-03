@@ -31,6 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from __future__ import division
+import array
 import math
 import random
 import time
@@ -43,6 +44,23 @@ from rqt_gui_py.plugin import Plugin
 from .publisher_widget import PublisherWidget
 from rqt_py_common.message_helpers import get_message_class
 from rqt_py_common.topic_helpers import get_slot_type
+
+_list_types = [list, tuple, array.array]
+try:
+    import numpy
+    _list_types.append(numpy.ndarray)
+except ImportError:
+    pass
+
+_numeric_types = [int, float]
+try:
+    import numpy
+    _numeric_types += [
+        numpy.int8, numpy.int16, numpy.int32, numpy.int64,
+        numpy.float16, numpy.float32, numpy.float64, numpy.float128,
+    ]
+except ImportError:
+    pass
 
 
 class Publisher(Plugin):
@@ -204,10 +222,13 @@ class Publisher(Plugin):
         else:
             # Strip topic name from the full topic path
             slot_path = topic_name.replace(publisher_info['topic_name'], '', 1)
+            slot_path, slot_array_index = self._extract_array_info(slot_path)
 
             # Get the property type from the message class
             slot_type, is_array = \
                 get_slot_type(publisher_info['message_instance'].__class__, slot_path)
+            if slot_array_index is not None:
+                is_array = False
 
             if is_array:
                 slot_type = list
@@ -270,6 +291,8 @@ class Publisher(Plugin):
         return message
 
     def _evaluate_expression(self, expression, slot_type):
+        global _list_types
+        global _numeric_types
         successful_eval = True
         try:
             # try to evaluate expression
@@ -292,7 +315,7 @@ class Publisher(Plugin):
             # check if value's type and slot_type belong to the same type group, i.e. array types,
             # numeric types and if they do, make sure values's type is converted to the exact
             # slot_type
-            if type_set <= set((list, tuple)) or type_set <= set((int, float)):
+            if type_set <= set(_list_types) or type_set <= set(_numeric_types):
                 # convert to the right type
                 value = slot_type(value)
 
@@ -305,6 +328,7 @@ class Publisher(Plugin):
         return False, None
 
     def _fill_message_slots(self, message, topic_name, expressions, counter):
+        global _list_types
         if topic_name in expressions and len(expressions[topic_name]) > 0:
 
             # get type
@@ -328,7 +352,7 @@ class Publisher(Plugin):
                 if value is not None:
                     setattr(message, slot_name, value)
 
-        elif type(message) in (list, tuple) and (len(message) > 0):
+        elif type(message) in _list_types and (len(message) > 0):
             for index, slot in enumerate(message):
                 value = self._fill_message_slots(
                     slot, topic_name + '[%d]' % index, expressions, counter)
