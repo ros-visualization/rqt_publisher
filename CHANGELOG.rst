@@ -2,8 +2,8 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.4.9 (2020-03-11)
+------------------
 * bump CMake minimum version to avoid CMP0048 warning
 * add Python 3 conditional dependencies (`#17 <https://github.com/ros-visualization/rqt_publisher/issues/17>`_)
 * autopep8 (`#1 <https://github.com/ros-visualization/rqt_publisher/issues/1>`_)
