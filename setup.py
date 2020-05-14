@@ -28,7 +28,7 @@ setup(
         'Topic :: Software Development',
     ],
     description=(
-        'RQT plugin for monitoring ROS processes.'
+        'A Python GUI plugin publishing ROS messages.'
     ),
     license='BSD',
     entry_points={
