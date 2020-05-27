@@ -66,6 +66,13 @@ class PublisherWidget(QWidget):
         ui_file = os.path.join(package_path, 'share', 'rqt_publisher', 'resource', 'Publisher.ui')
         loadUi(ui_file, self,
                {'ExtendedComboBox': ExtendedComboBox, 'PublisherTreeWidget': PublisherTreeWidget})
+
+        icon_paths = QIcon.themeSearchPaths()
+        icon_paths.append(os.path.join(
+            package_path, 'share', 'rqt_publisher', 'resource', 'icons', 'rqt_icons'))
+        QIcon.setThemeSearchPaths(icon_paths)
+        QIcon.setThemeName('rqt_icons')
+
         self.refresh_button.setIcon(QIcon.fromTheme('view-refresh'))
         self.refresh_button.clicked.connect(self.refresh_combo_boxes)
         self.add_publisher_button.setIcon(QIcon.fromTheme('list-add'))
