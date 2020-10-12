@@ -84,6 +84,7 @@ class Publisher(Plugin):
 
         # create context for the expression eval statement
         self._eval_locals = {'i': 0}
+        self._eval_locals["now"] = self._get_time
         for module in (math, random, time):
             self._eval_locals.update(module.__dict__)
         del self._eval_locals['__name__']
@@ -289,6 +290,9 @@ class Publisher(Plugin):
         else:
             message = base_message_type()
         return message
+
+    def _get_time(self):
+        return self._node.get_clock().now().to_msg()
 
     def _evaluate_expression(self, expression, slot_type):
         global _list_types
