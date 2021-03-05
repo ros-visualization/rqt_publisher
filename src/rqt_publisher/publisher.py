@@ -40,10 +40,13 @@ from python_qt_binding.QtCore import Slot, QSignalMapper, QTimer, qWarning
 
 from rclpy.exceptions import InvalidTopicNameException
 from rclpy.qos import QoSProfile
+
+from rosidl_runtime_py.utilities import get_message
+
 from rqt_gui_py.plugin import Plugin
-from .publisher_widget import PublisherWidget
-from rqt_py_common.message_helpers import get_message_class
 from rqt_py_common.topic_helpers import get_slot_type
+
+from .publisher_widget import PublisherWidget
 
 _list_types = [list, tuple, array.array]
 try:
@@ -128,7 +131,7 @@ class Publisher(Plugin):
         if publisher_info['message_instance'] is None:
             return
 
-        msg_module = get_message_class(publisher_info['type_name'])
+        msg_module = get_message(publisher_info['type_name'])
         if not msg_module:
             raise RuntimeError(
                 'The passed message type "{}" is invalid'.format(publisher_info['type_name']))
@@ -274,7 +277,7 @@ class Publisher(Plugin):
         base_type_str, array_size = self._extract_array_info(type_str)
 
         try:
-            base_message_type = get_message_class(base_type_str)
+            base_message_type = get_message(base_type_str)
         except LookupError as e:
             qWarning("Creating message type {} failed. Please check your spelling and that the "
                      "message package has been built\n{}".format(base_type_str, e))

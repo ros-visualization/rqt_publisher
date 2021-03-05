@@ -43,10 +43,12 @@ from python_qt_binding.QtWidgets import QWidget
 from qt_gui.ros_package_helper import get_package_path
 from qt_gui_py_common.worker_thread import WorkerThread
 
-from .publisher_tree_widget import PublisherTreeWidget
-from rqt_py_common.extended_combo_box import ExtendedComboBox
-from rqt_py_common.message_helpers import get_message_class, get_all_message_types
+from rosidl_runtime_py import get_message_interfaces
+from rosidl_runtime_py.utilities import get_message
 
+from rqt_py_common.extended_combo_box import ExtendedComboBox
+
+from .publisher_tree_widget import PublisherTreeWidget
 
 # main class inherits from the ui window class
 class PublisherWidget(QWidget):
@@ -114,11 +116,11 @@ class PublisherWidget(QWidget):
     def _update_thread_run(self):
         # update type_combo_box
         message_type_names = []
-        message_types = get_all_message_types()
+        message_types = get_message_interfaces()
         for package, message_types in message_types.items():
             for message_type in message_types:
-                base_type_str = package + '/msg/' + message_type
-                message_class = get_message_class(base_type_str)
+                base_type_str = f'{package}/{message_type}'
+                message_class = get_message(base_type_str)
                 if message_class is not None:
                     message_type_names.append(base_type_str)
 
