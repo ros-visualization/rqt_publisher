@@ -2,6 +2,12 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use rosidl_runtime_py instead of rqt_py_common where possible (`#24 <https://github.com/ros-visualization/rqt_publisher/issues/24>`_)
+* Add now() to evaluation (`#22 <https://github.com/ros-visualization/rqt_publisher/issues/22>`_)
+* Contributors: Ivan Santiago Paunovic, Yossi Ovcharik
+
 1.1.0 (2019-10-03)
 ------------------
 * fix setting expressions on sequence items (`#16 <https://github.com/ros-visualization/rqt_publisher/issues/16>`_)
