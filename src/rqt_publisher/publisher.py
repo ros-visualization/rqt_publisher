@@ -59,7 +59,7 @@ try:
     import numpy
     _numeric_types += [
         numpy.int8, numpy.int16, numpy.int32, numpy.int64,
-        numpy.float16, numpy.float32, numpy.float64, numpy.float128,
+        numpy.float16, numpy.float32, numpy.float64
     ]
 except ImportError:
     pass
