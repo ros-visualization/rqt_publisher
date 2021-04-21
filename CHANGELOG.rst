@@ -2,8 +2,8 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.4.10 (2021-04-21)
+-------------------
 * Update maintainer in package.xml (`#25 <https://github.com/ros-visualization/rqt_publisher/issues/25>`_)
 * fix shebang line for python3 (`#20 <https://github.com/ros-visualization/rqt_publisher/issues/20>`_)
 * Contributors: Mikael Arguedas, Shane Loretz
