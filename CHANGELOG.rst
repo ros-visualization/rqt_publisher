@@ -2,6 +2,12 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Changed the build type to ament_python and fixed package to run with ros2 run (`#18 <https://github.com/ros-visualization/rqt_publisher/issues/18>`_)
+* Drop numpy.float128 references (`#26 <https://github.com/ros-visualization/rqt_publisher/issues/26>`_)
+* Contributors: Alejandro Hernández Cordero, Michel Hidalgo
+
 1.1.1 (2021-03-16)
 ------------------
 * Use rosidl_runtime_py instead of rqt_py_common where possible (`#24 <https://github.com/ros-visualization/rqt_publisher/issues/24>`_)
