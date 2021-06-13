@@ -227,6 +227,14 @@ class Publisher(Plugin):
             # Strip topic name from the full topic path
             slot_path = topic_name.replace(publisher_info['topic_name'], '', 1)
             slot_path, slot_array_index = self._extract_array_info(slot_path)
+            
+            # Remove all "indexes" from slot_path, so get_slot_type works
+            opening_bracket = slot_path.find('[')
+            closing_bracket = slot_path.find(']')
+            while opening_bracket != -1 and closing_bracket != -1:
+                slot_path = slot_path[:opening_bracket] + slot_path[closing_bracket+1:]
+                opening_bracket = slot_path.find('[')
+                closing_bracket = slot_path.find(']')
 
             # Get the property type from the message class
             slot_type, is_array = \
@@ -263,8 +271,8 @@ class Publisher(Plugin):
 
     def _extract_array_info(self, type_str):
         array_size = None
-        if '[' in type_str and type_str[-1] == ']':
-            type_str, array_size_str = type_str.split('[', 1)
+        if type_str[-1] == ']':
+            type_str, array_size_str = type_str.rsplit('[', 1)
             array_size_str = array_size_str[:-1]
             if len(array_size_str) > 0:
                 array_size = int(array_size_str)
