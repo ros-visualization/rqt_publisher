@@ -2,6 +2,12 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.3 (2021-06-29)
+------------------
+* Fix: Do not ignore field values introduced by the user. (`#28 <https://github.com/ros-visualization/rqt_publisher/issues/28>`_)
+* Fix modern setuptools warning about dashes instead of underscores. (`#29 <https://github.com/ros-visualization/rqt_publisher/issues/29>`_)
+* Contributors: Chris Lalancette, coalman321
+
 1.1.2 (2021-04-27)
 ------------------
 * Changed the build type to ament_python and fixed package to run with ros2 run (`#18 <https://github.com/ros-visualization/rqt_publisher/issues/18>`_)

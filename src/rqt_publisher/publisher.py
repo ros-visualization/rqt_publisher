@@ -227,7 +227,7 @@ class Publisher(Plugin):
             # Strip topic name from the full topic path
             slot_path = topic_name.replace(publisher_info['topic_name'], '', 1)
             slot_path, slot_array_index = self._extract_array_info(slot_path)
-            
+
             # Remove all "indexes" from slot_path, so get_slot_type works
             opening_bracket = slot_path.find('[')
             closing_bracket = slot_path.find(']')
