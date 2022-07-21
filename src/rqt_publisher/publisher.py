@@ -35,6 +35,7 @@ import array
 import math
 import random
 import time
+import re
 
 from python_qt_binding.QtCore import Slot, QSignalMapper, QTimer, qWarning
 
@@ -65,7 +66,6 @@ try:
 except ImportError:
     pass
 
-
 class Publisher(Plugin):
 
     def __init__(self, context):
@@ -88,7 +88,7 @@ class Publisher(Plugin):
         # create context for the expression eval statement
         self._eval_locals = {'i': 0}
         self._eval_locals["now"] = self._get_time
-        for module in (math, random, time):
+        for module in (math, random, time, array):
             self._eval_locals.update(module.__dict__)
         del self._eval_locals['__name__']
         del self._eval_locals['__doc__']
@@ -216,8 +216,8 @@ class Publisher(Plugin):
         return '%.2f' % publisher_info['rate']
 
     def _change_publisher_expression(self, publisher_info, topic_name, new_value):
-        expression = str(new_value)
-        if len(expression) == 0:
+        user_expression = str(new_value)
+        if len(user_expression) == 0:
             if topic_name in publisher_info['expressions']:
                 del publisher_info['expressions'][topic_name]
                 # qDebug(
@@ -227,39 +227,60 @@ class Publisher(Plugin):
             # Strip topic name from the full topic path
             slot_path = topic_name.replace(publisher_info['topic_name'], '', 1)
             slot_path, slot_array_index = self._extract_array_info(slot_path)
+            slot_type = None
 
-            # Get the property type from the message class
-            slot_type, is_array = \
-                get_slot_type(publisher_info['message_instance'].__class__, slot_path)
-            if slot_array_index is not None:
-                is_array = False
-
-            if is_array:
-                slot_type = list
             # strip possible trailing error message from expression
-            error_prefix = '# error'
-            error_prefix_pos = expression.find(error_prefix)
-            if error_prefix_pos >= 0:
-                expression = expression[:error_prefix_pos]
-            success, _ = self._evaluate_expression(expression, slot_type)
+            contains_error = re.match("(.*)\s*# error.*", user_expression)
+            if contains_error:
+                user_expression = contains_error.group(1)
+
+            computed_expression = str(user_expression)
+            # expression can contain topics with indexes, i.e. /chatter[0]
+            # remove index to match message_instance, i.e. /chatter
+            topic_name_includes_index = re.match("(.*)\[[0-9]*\]$", topic_name)
+            if topic_name_includes_index:
+                topic_name = topic_name_includes_index.group(1)
+
+            # static sequences change one item at a time, impossible to validate
+            # handle as entire sequence, enables validation
+            if slot_array_index is not None:
+                # remove first '/'
+                slot_array = \
+                    self._extract_slot_array(slot_path[1:].split('/'), publisher_info['message_instance'])
+                slot_type = slot_array.__class__
+                # quotes from gui are still present, remove them
+                includes_quotes = re.match('^\s*[\'|\"](.*)[\'|\"]\s*$', computed_expression)
+                if includes_quotes:
+                    computed_expression = includes_quotes.group(1)
+                # try to insert expression
+                try:
+                    slot_array[slot_array_index] = computed_expression
+                except Exception as e:
+                    return '%s # error: %s' % (user_expression, e)
+                # expression is now full sequence
+                computed_expression = slot_array
+
+            # determine the property type, supplemental wrapper for get_slot_type()
+            slot_type = \
+                self._resolve_slot_type(computed_expression, slot_type, slot_path, publisher_info['message_instance'].__class__)
+            success, _ = self._evaluate_expression(computed_expression, slot_type)
             if success:
                 old_expression = publisher_info['expressions'].get(topic_name, None)
-                publisher_info['expressions'][topic_name] = expression
+                publisher_info['expressions'][topic_name] = computed_expression
                 try:
                     self._fill_message_slots(
                         publisher_info['message_instance'], publisher_info['topic_name'],
                         publisher_info['expressions'], publisher_info['counter'])
-
                 except Exception as e:
                     if old_expression is not None:
                         publisher_info['expressions'][topic_name] = old_expression
                     else:
                         del publisher_info['expressions'][topic_name]
-                    return '%s %s: %s' % (expression, error_prefix, e)
-                return expression
+                    return '%s # error: %s' % (user_expression, e)
+                return user_expression
             else:
-                return '%s %s evaluating as "%s"' % (
-                    expression, error_prefix, slot_type.__name__)
+                return '%s # error evaluating as "%s"' % (
+                    user_expression, slot_type.__name__)
 
     def _extract_array_info(self, type_str):
         array_size = None
@@ -272,6 +293,37 @@ class Publisher(Plugin):
                 array_size = 0
 
         return type_str, array_size
+
+    def _extract_slot_array(self, slot_paths, slot_array):
+        if len(slot_paths) == 0:
+            return slot_array
+        slot_array_name = '_' + slot_paths[0]
+        slot_array = getattr(slot_array, slot_array_name)
+        return self._extract_slot_array(slot_paths[1:], slot_array)
+
+    def _resolve_slot_type(self, expression, slot_type, slot_path, message_class):
+        if slot_type is None:
+            # check for types that get_slot_type doesn't handle well
+            # check for array.array type
+            is_array_array = re.search("^array\(\'.\', (\[.*\])\)", expression)
+            if is_array_array:
+                return array.array
+
+            # check for list type
+            is_list = re.match("^\[.*\]\s*$", expression)
+            if is_list:
+                return list
+
+            # check for string type
+            is_string = re.match("^\'.*\'\s*$", expression)
+            if is_string:
+                return str
+
+            # at this point, get_slot_type can determine the type
+            slot_type, _ = \
+                get_slot_type(message_class, slot_path)
+
+        return slot_type
 
     def _create_message_instance(self, type_str):
         base_type_str, array_size = self._extract_array_info(type_str)
@@ -303,7 +355,10 @@ class Publisher(Plugin):
         successful_eval = True
         try:
             # try to evaluate expression
-            value = eval(expression, {}, self._eval_locals)
+            if isinstance(expression, str):
+                value = eval(expression, {}, self._eval_locals)
+            else:
+                value = expression
         except Exception as e:
             qWarning('Python eval failed for expression "{}"'.format(expression) +
                      ' with an exception "{}"'.format(e))
@@ -324,7 +379,8 @@ class Publisher(Plugin):
             # slot_type
             if type_set <= set(_list_types) or type_set <= set(_numeric_types):
                 # convert to the right type
-                value = slot_type(value)
+                if slot_type is not numpy.ndarray and slot_type is not array.array:
+                    value = slot_type(value)
 
         if successful_eval and isinstance(value, slot_type):
             return True, value
@@ -337,13 +393,11 @@ class Publisher(Plugin):
     def _fill_message_slots(self, message, topic_name, expressions, counter):
         global _list_types
         if topic_name in expressions and len(expressions[topic_name]) > 0:
-
             # get type
             if hasattr(message, '_type'):
                 message_type = message._type
             else:
                 message_type = type(message)
-
             self._eval_locals['i'] = counter
             success, value = self._evaluate_expression(expressions[topic_name], message_type)
             if not success:
@@ -359,6 +413,7 @@ class Publisher(Plugin):
                 if value is not None:
                     setattr(message, slot_name, value)
 
+        # This does not validate the entry because it tries to check each element and not whole list
         elif type(message) in _list_types and (len(message) > 0):
             for index, slot in enumerate(message):
                 value = self._fill_message_slots(
@@ -366,7 +421,6 @@ class Publisher(Plugin):
                 # this deals with primitive-type arrays
                 if not hasattr(message[0], '__slots__') and value is not None:
                     message[index] = value
-
         return None
 
     @Slot(int)
