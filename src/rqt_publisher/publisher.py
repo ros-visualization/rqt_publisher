@@ -230,19 +230,18 @@ class Publisher(Plugin):
             slot_type = None
 
             # strip possible trailing error message from expression
-            contains_error = re.match("(.*)\s*# error.*", user_expression)
-            if contains_error:
-                user_expression = contains_error.group(1)
+            error_prefix = ' # error'
+            error_prefix_pos = user_expression.find(error_prefix)
+            if error_prefix_pos >= 0:
+                user_expression = user_expression[:error_prefix_pos]
 
             computed_expression = str(user_expression)
-            # expression can contain topics with indexes, i.e. /chatter[0]
-            # remove index to match message_instance, i.e. /chatter
-            topic_name_includes_index = re.match("(.*)\[[0-9]*\]$", topic_name)
-            if topic_name_includes_index:
-                topic_name = topic_name_includes_index.group(1)
+            # reduce indexed topic_names, if necessary
+            topic_name_reduction = re.match("(.*)\[[0-9]*\]$", topic_name)
+            if topic_name_reduction:
+                topic_name = topic_name_reduction.group(1)
 
-            # static sequences change one item at a time, impossible to validate
-            # handle as entire sequence, enables validation
+            # sequences
             if slot_array_index is not None:
                 # remove first '/'
                 slot_array = \
@@ -256,11 +255,11 @@ class Publisher(Plugin):
                 try:
                     slot_array[slot_array_index] = computed_expression
                 except Exception as e:
-                    return '%s # error: %s' % (user_expression, e)
+                    return '%s %s: %s' % (user_expression, error_prefix, e)
                 # expression is now full sequence
                 computed_expression = slot_array
 
-            # determine the property type, supplemental wrapper for get_slot_type()
+            # Get the property type
             slot_type = \
                 self._resolve_slot_type(computed_expression, slot_type, slot_path, publisher_info['message_instance'].__class__)
             success, _ = self._evaluate_expression(computed_expression, slot_type)
@@ -276,11 +275,11 @@ class Publisher(Plugin):
                         publisher_info['expressions'][topic_name] = old_expression
                     else:
                         del publisher_info['expressions'][topic_name]
-                    return '%s # error: %s' % (user_expression, e)
+                    return '%s %s: %s' % (user_expression, error_prefix, e)
                 return user_expression
             else:
-                return '%s # error evaluating as "%s"' % (
-                    user_expression, slot_type.__name__)
+                return '%s %s evaluating as "%s"' % (
+                    user_expression, error_prefix, slot_type.__name__)
 
     def _extract_array_info(self, type_str):
         array_size = None
@@ -303,23 +302,20 @@ class Publisher(Plugin):
 
     def _resolve_slot_type(self, expression, slot_type, slot_path, message_class):
         if slot_type is None:
-            # check for types that get_slot_type doesn't handle well
-            # check for array.array type
+            # array.array
             is_array_array = re.search("^array\(\'.\', (\[.*\])\)", expression)
             if is_array_array:
                 return array.array
-
-            # check for list type
+                # return is_array_array.group(1), array.array
+            # list
             is_list = re.match("^\[.*\]\s*$", expression)
             if is_list:
                 return list
-
-            # check for string type
+            # string
             is_string = re.match("^\'.*\'\s*$", expression)
             if is_string:
                 return str
 
-            # at this point, get_slot_type can determine the type
             slot_type, _ = \
                 get_slot_type(message_class, slot_path)
 
