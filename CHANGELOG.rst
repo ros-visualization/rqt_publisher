@@ -2,6 +2,15 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.6.0 (2022-08-02)
+------------------
+* Delete sync to foxy-devel workflow
+* Merge pull request `#33 <https://github.com/ros-visualization/rqt_publisher/issues/33>`_ from NBadyal/improve-evaluation-of-types
+* Use regex matching to strip errors from input
+* Change slot_type verification strategy
+* Mirror rolling to foxy-devel
+* Contributors: Audrow Nash, Geoffrey Biggs, Nicholas Badyal
+
 1.2.0 (2022-05-10)
 ------------------
 
