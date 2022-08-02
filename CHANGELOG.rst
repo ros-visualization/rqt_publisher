@@ -2,6 +2,9 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.5.0 (2022-08-02)
+------------------
+
 1.1.3 (2021-06-29)
 ------------------
 * Fix: Do not ignore field values introduced by the user. (`#28 <https://github.com/ros-visualization/rqt_publisher/issues/28>`_)
