@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Copyright (c) 2011, Dorian Scholz, TU Darmstadt
 # All rights reserved.
 #
@@ -30,7 +28,6 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from __future__ import division
 import array
 import math
 import random
@@ -164,9 +161,6 @@ class Publisher(Plugin):
 
     def _change_publisher_topic(self, publisher_info, topic_name, new_value):
         publisher_info['enabled'] = (new_value and new_value.lower() in ['1', 'true', 'yes'])
-        # qDebug(
-        #   'Publisher._change_publisher_enabled(): %s enabled: %s' %
-        #   (publisher_info['topic_name'], publisher_info['enabled']))
         if publisher_info['enabled'] and publisher_info['rate'] > 0:
             publisher_info['timer'].start(int(1000.0 / publisher_info['rate']))
         else:
@@ -206,9 +200,6 @@ class Publisher(Plugin):
                      (new_value))
         else:
             publisher_info['rate'] = rate
-            # qDebug(
-            #   'Publisher._change_publisher_rate(): %s rate changed: %fHz' %
-            #   (publisher_info['topic_name'], publisher_info['rate']))
             publisher_info['timer'].stop()
             if publisher_info['enabled'] and publisher_info['rate'] > 0:
                 publisher_info['timer'].start(int(1000.0 / publisher_info['rate']))
