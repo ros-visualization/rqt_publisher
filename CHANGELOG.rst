@@ -2,6 +2,11 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Minor cleanups in rqt_publisher for ROS 2 (`#35 <https://github.com/ros-visualization/rqt_publisher/issues/35>`_)
+* Contributors: Chris Lalancette
+
 1.6.0 (2022-08-02)
 ------------------
 * Delete sync to foxy-devel workflow
