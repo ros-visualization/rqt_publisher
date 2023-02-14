@@ -2,8 +2,8 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.6.2 (2023-02-14)
+------------------
 * [rolling] Update maintainers - 2022-11-07 (`#36 <https://github.com/ros-visualization/rqt_publisher/issues/36>`_)
 * Contributors: Audrow Nash
 
