@@ -170,25 +170,24 @@ class Publisher(Plugin):
     def _change_publisher_type(self, publisher_info, topic_name, new_value):
         type_name = new_value
         # create new slot
-        slot_value = self._create_message_instance(type_name)
+        field_value = self._create_message_instance(type_name)
 
         # find parent slot
-        slot_path = topic_name[len(publisher_info['topic_name']):].strip('/').split('/')
-        parent_slot = eval('.'.join(["publisher_info['message_instance']"] + slot_path[:-1]))
+        field_path = topic_name[len(publisher_info['topic_name']):].strip('/').split('/')
+        parent_field = eval('.'.join(["publisher_info['message_instance']"] + field_path[:-1]))
 
         # find old slot
-        slot_name = slot_path[-1]
-        slot_index = parent_slot.__slots__.index(slot_name)
+        field_name = field_path[-1]
 
         # restore type if user value was invalid
-        if slot_value is None:
+        if field_value is None:
             qWarning('Publisher._change_publisher_type(): could not find type: %s' % (type_name))
-            return parent_slot._slot_types[slot_index]
+            return parent_field.get_field_and_field_types()[field_name]
 
         else:
             # replace old slot
-            parent_slot._slot_types[slot_index] = type_name
-            setattr(parent_slot, slot_name, slot_value)
+            parent_field.get_field_and_field_types()[field_name] = type_name
+            setattr(parent_field, field_name, field_value)
 
             self._widget.publisher_tree_widget.model().update_publisher(publisher_info)
 
