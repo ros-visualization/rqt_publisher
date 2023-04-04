@@ -182,11 +182,11 @@ class Publisher(Plugin):
         # restore type if user value was invalid
         if field_value is None:
             qWarning('Publisher._change_publisher_type(): could not find type: %s' % (type_name))
-            return parent_field.get_field_and_field_types()[field_name]
+            return parent_field.get_fields_and_field_types()[field_name]
 
         else:
             # replace old message field
-            parent_field.get_field_and_field_types()[field_name] = type_name
+            parent_field.get_fields_and_field_types()[field_name] = type_name
             setattr(parent_field, field_name, field_value)
 
             self._widget.publisher_tree_widget.model().update_publisher(publisher_info)
