@@ -169,14 +169,14 @@ class Publisher(Plugin):
 
     def _change_publisher_type(self, publisher_info, topic_name, new_value):
         type_name = new_value
-        # create new slot
+        # create new message field
         field_value = self._create_message_instance(type_name)
 
-        # find parent slot
+        # find parent field
         field_path = topic_name[len(publisher_info['topic_name']):].strip('/').split('/')
         parent_field = eval('.'.join(["publisher_info['message_instance']"] + field_path[:-1]))
 
-        # find old slot
+        # find old message field
         field_name = field_path[-1]
 
         # restore type if user value was invalid
@@ -185,7 +185,7 @@ class Publisher(Plugin):
             return parent_field.get_field_and_field_types()[field_name]
 
         else:
-            # replace old slot
+            # replace old message field
             parent_field.get_field_and_field_types()[field_name] = type_name
             setattr(parent_field, field_name, field_value)
 
