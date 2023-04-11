@@ -229,13 +229,24 @@ class Publisher(Plugin):
             slot_path, slot_array_index = self._extract_array_info(slot_path)
 
             # Get the property type from the message class
-            slot_type, is_array = \
-                get_slot_type(publisher_info['message_instance'].__class__, slot_path)
-            if slot_array_index is not None:
-                is_array = False
-
-            if is_array:
+            ### Currently get_slot_type doesn't handle arrays
+            field_name = [f for f in slot_path.split('/') if f][0]
+            field_type = publisher_info['message_instance'].__class__\
+                            .get_fields_and_field_types()[field_name]
+            if field_type == "sequence<string>":
                 slot_type = list
+            elif field_type.startswith("sequence"):
+                slot_type = array.array
+            else:
+                ### Normal handling
+                slot_type, is_array = \
+                    get_slot_type(publisher_info['message_instance'].__class__, slot_path)
+                if slot_array_index is not None:
+                    is_array = False
+
+                if is_array:
+                    slot_type = list
+
             # strip possible trailing error message from expression
             error_prefix = '# error'
             error_prefix_pos = expression.find(error_prefix)
@@ -303,7 +314,8 @@ class Publisher(Plugin):
         successful_eval = True
         try:
             # try to evaluate expression
-            value = eval(expression, {}, self._eval_locals)
+            # make sure to allow definition of array types
+            value = eval(expression, {"array": array.array}, self._eval_locals)
         except Exception as e:
             qWarning('Python eval failed for expression "{}"'.format(expression) +
                      ' with an exception "{}"'.format(e))
@@ -317,6 +329,10 @@ class Publisher(Plugin):
                 value = str(expression)
             successful_eval = True
 
+        ## Return if value is correct type
+        if successful_eval and isinstance(value, slot_type):
+            return True, value
+        ## If not, check if value is in correct type group
         elif successful_eval:
             type_set = set((slot_type, type(value)))
             # check if value's type and slot_type belong to the same type group, i.e. array types,
@@ -325,9 +341,6 @@ class Publisher(Plugin):
             if type_set <= set(_list_types) or type_set <= set(_numeric_types):
                 # convert to the right type
                 value = slot_type(value)
-
-        if successful_eval and isinstance(value, slot_type):
-            return True, value
         else:
             qWarning('Publisher._evaluate_expression(): failed to evaluate ' +
                      'expression: "%s" as Python type "%s"' % (
