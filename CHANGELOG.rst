@@ -2,6 +2,11 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Changes the use of __slots_\_ for the field and field type getter
+* Contributors: Michael Jeronimo, Voldivh
+
 1.6.2 (2023-02-14)
 ------------------
 * [rolling] Update maintainers - 2022-11-07 (`#36 <https://github.com/ros-visualization/rqt_publisher/issues/36>`_)
