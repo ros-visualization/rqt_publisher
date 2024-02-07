@@ -2,8 +2,8 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.7.1 (2024-02-07)
+------------------
 * Add in a test dependency on pytest. (`#41 <https://github.com/ros-visualization/rqt_publisher/issues/41>`_)
 * Contributors: Chris Lalancette
 
