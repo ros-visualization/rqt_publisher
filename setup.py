@@ -31,6 +31,7 @@ setup(
         'A Python GUI plugin publishing ROS messages.'
     ),
     license='BSD',
+    tests_require=['pytest'],
     entry_points={
         'console_scripts': [
             'rqt_publisher = ' + package_name + '.main:main',
