@@ -220,14 +220,14 @@ class Publisher(Plugin):
             slot_type = None
 
             # strip possible trailing error message from expression
-            contains_error = re.match("(.*)\s*# error.*", user_expression)
+            contains_error = re.match(r"(.*)\s*# error.*", user_expression)
             if contains_error:
                 user_expression = contains_error.group(1)
 
             computed_expression = str(user_expression)
             # expression can contain topics with indexes, i.e. /chatter[0]
             # remove index to match message_instance, i.e. /chatter
-            topic_name_includes_index = re.match("(.*)\[[0-9]*\]$", topic_name)
+            topic_name_includes_index = re.match(r"(.*)\[[0-9]*\]$", topic_name)
             if topic_name_includes_index:
                 topic_name = topic_name_includes_index.group(1)
 
@@ -239,7 +239,7 @@ class Publisher(Plugin):
                     self._extract_slot_array(slot_path[1:].split('/'), publisher_info['message_instance'])
                 slot_type = slot_array.__class__
                 # quotes from gui are still present, remove them
-                includes_quotes = re.match('^\s*[\'|\"](.*)[\'|\"]\s*$', computed_expression)
+                includes_quotes = re.match(r'^\s*[\'|\"](.*)[\'|\"]\s*$', computed_expression)
                 if includes_quotes:
                     computed_expression = includes_quotes.group(1)
                 # try to insert expression
@@ -295,17 +295,17 @@ class Publisher(Plugin):
         if slot_type is None:
             # check for types that get_slot_type doesn't handle well
             # check for array.array type
-            is_array_array = re.search("^array\(\'.\', (\[.*\])\)", expression)
+            is_array_array = re.search(r"^array\(\'.\', (\[.*\])\)", expression)
             if is_array_array:
                 return array.array
 
             # check for list type
-            is_list = re.match("^\[.*\]\s*$", expression)
+            is_list = re.match(r"^\[.*\]\s*$", expression)
             if is_list:
                 return list
 
             # check for string type
-            is_string = re.match("^\'.*\'\s*$", expression)
+            is_string = re.match(r"^\'.*\'\s*$", expression)
             if is_string:
                 return str
 
