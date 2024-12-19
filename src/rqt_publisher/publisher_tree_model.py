@@ -33,8 +33,8 @@ import threading
 from python_qt_binding.QtCore import Qt, Signal
 from python_qt_binding.QtGui import QStandardItem, QStandardItemModel
 
+from rqt_py_common.data_items import CheckableItem, ReadonlyItem
 from rqt_py_common.message_tree_model import MessageTreeModel
-from rqt_py_common.data_items import ReadonlyItem, CheckableItem
 
 
 class PublisherTreeModel(MessageTreeModel):

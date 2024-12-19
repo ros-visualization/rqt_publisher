@@ -31,10 +31,10 @@
 import array
 import math
 import random
-import time
 import re
+import time
 
-from python_qt_binding.QtCore import Slot, QSignalMapper, QTimer, qWarning
+from python_qt_binding.QtCore import QSignalMapper, QTimer, qWarning, Slot
 
 from rclpy.exceptions import InvalidTopicNameException
 from rclpy.qos import QoSProfile
@@ -63,6 +63,7 @@ try:
 except ImportError:
     pass
 
+
 class Publisher(Plugin):
 
     def __init__(self, context):
@@ -84,7 +85,7 @@ class Publisher(Plugin):
 
         # create context for the expression eval statement
         self._eval_locals = {'i': 0}
-        self._eval_locals["now"] = self._get_time
+        self._eval_locals['now'] = self._get_time
         for module in (math, random, time, array):
             self._eval_locals.update(module.__dict__)
         del self._eval_locals['__name__']
@@ -220,14 +221,14 @@ class Publisher(Plugin):
             slot_type = None
 
             # strip possible trailing error message from expression
-            contains_error = re.match(r"(.*)\s*# error.*", user_expression)
+            contains_error = re.match(r'(.*)\s*# error.*', user_expression)
             if contains_error:
                 user_expression = contains_error.group(1)
 
             computed_expression = str(user_expression)
             # expression can contain topics with indexes, i.e. /chatter[0]
             # remove index to match message_instance, i.e. /chatter
-            topic_name_includes_index = re.match(r"(.*)\[[0-9]*\]$", topic_name)
+            topic_name_includes_index = re.match(r'(.*)\[[0-9]*\]$', topic_name)
             if topic_name_includes_index:
                 topic_name = topic_name_includes_index.group(1)
 
@@ -235,8 +236,8 @@ class Publisher(Plugin):
             # handle as entire sequence, enables validation
             if slot_array_index is not None:
                 # remove first '/'
-                slot_array = \
-                    self._extract_slot_array(slot_path[1:].split('/'), publisher_info['message_instance'])
+                slot_array = self._extract_slot_array(
+                    slot_path[1:].split('/'), publisher_info['message_instance'])
                 slot_type = slot_array.__class__
                 # quotes from gui are still present, remove them
                 includes_quotes = re.match(r'^\s*[\'|\"](.*)[\'|\"]\s*$', computed_expression)
@@ -251,8 +252,9 @@ class Publisher(Plugin):
                 computed_expression = slot_array
 
             # determine the property type, supplemental wrapper for get_slot_type()
-            slot_type = \
-                self._resolve_slot_type(computed_expression, slot_type, slot_path, publisher_info['message_instance'].__class__)
+            slot_type = self._resolve_slot_type(
+                computed_expression, slot_type, slot_path,
+                publisher_info['message_instance'].__class__)
             success, _ = self._evaluate_expression(computed_expression, slot_type)
             if success:
                 old_expression = publisher_info['expressions'].get(topic_name, None)
@@ -300,12 +302,12 @@ class Publisher(Plugin):
                 return array.array
 
             # check for list type
-            is_list = re.match(r"^\[.*\]\s*$", expression)
+            is_list = re.match(r'^\[.*\]\s*$', expression)
             if is_list:
                 return list
 
             # check for string type
-            is_string = re.match(r"^\'.*\'\s*$", expression)
+            is_string = re.match(r'^\'.*\'\s*$', expression)
             if is_string:
                 return str
 
@@ -321,8 +323,8 @@ class Publisher(Plugin):
         try:
             base_message_type = get_message(base_type_str)
         except LookupError as e:
-            qWarning("Creating message type {} failed. Please check your spelling and that the "
-                     "message package has been built\n{}".format(base_type_str, e))
+            qWarning('Creating message type {} failed. Please check your spelling and that the '
+                     'message package has been built\n{}'.format(base_type_str, e))
             return None
 
         if base_message_type is None:
@@ -363,7 +365,7 @@ class Publisher(Plugin):
             successful_eval = True
 
         elif successful_eval:
-            type_set = set((slot_type, type(value)))
+            type_set = {slot_type, type(value)}
             # check if value's type and slot_type belong to the same type group, i.e. array types,
             # numeric types and if they do, make sure values's type is converted to the exact
             # slot_type
@@ -403,7 +405,7 @@ class Publisher(Plugin):
                 if value is not None:
                     setattr(message, slot_name, value)
 
-        # This does not validate the entry because it tries to check each element and not whole list
+        # This does not validate the entry because it checks each element and not the whole list
         elif type(message) in _list_types and (len(message) > 0):
             for index, slot in enumerate(message):
                 value = self._fill_message_slots(

@@ -47,6 +47,7 @@ from rqt_py_common.extended_combo_box import ExtendedComboBox
 
 from .publisher_tree_widget import PublisherTreeWidget
 
+
 # main class inherits from the ui window class
 class PublisherWidget(QWidget):
     add_publisher = Signal(str, str, float, bool)
@@ -94,6 +95,8 @@ class PublisherWidget(QWidget):
 
     def _get_message_types(self, package_name):
         """
+        Get the message types.
+
         Implementation taken from ros2cli.
 
         https://github.com/ros2/ros2cli/blob/master/ros2msg/ros2msg/api/__init__.py
