@@ -2,8 +2,8 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.9.0 (2024-12-20)
+------------------
 * Add in the remaining standard ament_python tests. (`#49 <https://github.com/ros-visualization/rqt_publisher/issues/49>`_)
 * Add in LICENSE. (`#46 <https://github.com/ros-visualization/rqt_publisher/issues/46>`_)
 * Remove CODEOWNERS (`#47 <https://github.com/ros-visualization/rqt_publisher/issues/47>`_)
