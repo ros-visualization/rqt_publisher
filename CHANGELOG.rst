@@ -2,8 +2,8 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.4.11 (2025-04-10)
+-------------------
 * Import setup from setuptools instead of distutils.core (`#37 <https://github.com/ros-visualization/rqt_publisher/issues/37>`_)
 * Update maintainers `#32 <https://github.com/ros-visualization/rqt_publisher/issues/32>`_
 * Contributors: Arne Hitzmann, Geoffrey Biggs, Matthijs van der Burgh
