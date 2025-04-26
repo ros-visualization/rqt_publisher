@@ -2,8 +2,8 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.4.12 (2025-04-26)
+-------------------
 * Bump cmake_minimum_required to avoid deprecation (`#50 <https://github.com/ros-visualization/rqt_publisher/issues/50>`_)
 * Contributors: Arne Hitzmann
 
