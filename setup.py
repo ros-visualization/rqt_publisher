@@ -4,7 +4,7 @@ package_name = 'rqt_publisher'
 
 setup(
     name=package_name,
-    version='1.9.0',
+    version='1.10.0',
     packages=[package_name],
     package_dir={'': 'src'},
     data_files=[

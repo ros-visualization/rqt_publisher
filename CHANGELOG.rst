@@ -2,6 +2,9 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.10.0 (2025-04-28)
+-------------------
+
 1.9.0 (2024-12-20)
 ------------------
 * Add in the remaining standard ament_python tests. (`#49 <https://github.com/ros-visualization/rqt_publisher/issues/49>`_)
