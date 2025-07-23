@@ -23,7 +23,6 @@ setup(
     keywords=['ROS'],
     classifiers=[
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
         'Programming Language :: Python',
         'Topic :: Software Development',
     ],
@@ -31,6 +30,14 @@ setup(
         'A Python GUI plugin publishing ROS messages.'
     ),
     license='BSD',
+<<<<<<< HEAD
+=======
+    extras_require={
+        'test': [
+            'pytest',
+        ],
+    },
+>>>>>>> b64a99c (fix setuptools deprecations (#52))
     entry_points={
         'console_scripts': [
             'rqt_publisher = ' + package_name + '.main:main',
