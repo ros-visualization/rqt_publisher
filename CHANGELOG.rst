@@ -2,6 +2,18 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix setuptools deprecations (backport `#52 <https://github.com/ros-visualization/rqt_publisher/issues/52>`_) (`#54 <https://github.com/ros-visualization/rqt_publisher/issues/54>`_)
+  fix setuptools deprecations (`#52 <https://github.com/ros-visualization/rqt_publisher/issues/52>`_)
+  (cherry picked from commit b64a99c25a351645284e2880999cab3f32ea5512)
+  Co-authored-by: mosfet80 <10235105+mosfet80@users.noreply.github.com>
+* Remove CODEOWNERS (backport `#47 <https://github.com/ros-visualization/rqt_publisher/issues/47>`_) (`#48 <https://github.com/ros-visualization/rqt_publisher/issues/48>`_)
+  Remove CODEOWNERS (`#47 <https://github.com/ros-visualization/rqt_publisher/issues/47>`_)
+  (cherry picked from commit ee9cb5d8fce08c87c52e63e695fc5aecca7b8192)
+  Co-authored-by: Alejandro Hernández Cordero <ahcorde@gmail.com>
+* Contributors: mergify[bot]
+
 1.7.2 (2024-03-28)
 ------------------
 * Use raw strings for regular expressions. (`#44 <https://github.com/ros-visualization/rqt_publisher/issues/44>`_)
