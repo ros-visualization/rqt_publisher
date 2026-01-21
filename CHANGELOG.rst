@@ -2,8 +2,8 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.7.3 (2026-01-21)
+------------------
 * fix setuptools deprecations (backport `#52 <https://github.com/ros-visualization/rqt_publisher/issues/52>`_) (`#54 <https://github.com/ros-visualization/rqt_publisher/issues/54>`_)
   fix setuptools deprecations (`#52 <https://github.com/ros-visualization/rqt_publisher/issues/52>`_)
   (cherry picked from commit b64a99c25a351645284e2880999cab3f32ea5512)
