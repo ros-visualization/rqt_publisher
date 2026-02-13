@@ -95,7 +95,7 @@ class Publisher(Plugin):
         self._id_counter = 0
 
         self._timeout_mapper = QSignalMapper(self)
-        self._timeout_mapper.mapped[int].connect(self.publish_once)
+        self._timeout_mapper.mappedInt.connect(self.publish_once)
 
         # add our self to the main window
         context.add_widget(self._widget)
