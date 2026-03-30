@@ -28,10 +28,14 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+from packaging.version import Version
+from python_qt_binding import QT_BINDING_VERSION
 from python_qt_binding.QtCore import Signal, Slot
 from python_qt_binding.QtGui import QIcon
-from python_qt_binding.QtWidgets import QAction
-
+if Version(QT_BINDING_VERSION) >= Version('6.0.0'):
+    from python_qt_binding.QtGui import QAction
+else:
+    from python_qt_binding.QtWidgets import QAction
 from rqt_py_common.item_delegates import SpinBoxDelegate
 from rqt_py_common.message_tree_widget import MessageTreeWidget
 

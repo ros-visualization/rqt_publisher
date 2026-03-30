@@ -69,7 +69,7 @@ class PublisherTreeModel(MessageTreeModel):
         topic_name = item._path
         column_name = self._column_names[item.column()]
         if item.isCheckable():
-            new_value = str(item.checkState() == Qt.Checked)
+            new_value = str(item.checkState() == Qt.CheckState.Checked)
         else:
             new_value = item.text().strip()
 
@@ -109,7 +109,7 @@ class PublisherTreeModel(MessageTreeModel):
 
         # fill tree widget columns of top level item
         if publisher_info['enabled']:
-            top_level_row[self._column_index['topic']].setCheckState(Qt.Checked)
+            top_level_row[self._column_index['topic']].setCheckState(Qt.CheckState.Checked)
         top_level_row[self._column_index['rate']].setText(str(publisher_info['rate']))
 
     def _get_data_items_for_path(self, slot_name, slot_type_name, slot_path, **kwargs):
@@ -145,7 +145,7 @@ class PublisherTreeModel(MessageTreeModel):
                     index.row(),
                     self._column_index['type'],
                     index.parent()),
-                Qt.DisplayRole) == 'bool'
+                Qt.ItemDataRole.DisplayRole) == 'bool'
         ):
             flags |= Qt.ItemIsUserCheckable
         return flags
@@ -158,17 +158,17 @@ class PublisherTreeModel(MessageTreeModel):
                     index.row(),
                     self._column_index['type'],
                     index.parent()),
-                Qt.DisplayRole) == 'bool'
+                Qt.ItemDataRole.DisplayRole) == 'bool'
         ):
             if role == Qt.CheckStateRole:
                 value = \
                     index.model().data(
                         index.model().index(
                             index.row(), index.column(), index.parent()),
-                        Qt.DisplayRole)
+                        Qt.ItemDataRole.DisplayRole)
 
                 if value == 'True':
-                    return Qt.Checked
+                    return Qt.CheckState.Checked
                 if value == 'False':
                     return Qt.Unchecked
                 return Qt.PartiallyChecked
@@ -180,9 +180,9 @@ class PublisherTreeModel(MessageTreeModel):
             index.model().data(
                 index.model().index(
                     index.row(), self._column_index['type'], index.parent()),
-                Qt.DisplayRole) == 'bool'
+                Qt.ItemDataRole.DisplayRole) == 'bool'
         ):
             if role == Qt.CheckStateRole:
-                value = str(value == Qt.Checked)
+                value = str(value == Qt.CheckState.Checked)
                 return QStandardItemModel.setData(self, index, value, Qt.EditRole)
         return QStandardItemModel.setData(self, index, value, role)
