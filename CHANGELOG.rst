@@ -2,6 +2,11 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.9.1 (2026-04-13)
+------------------
+* fix setuptools deprecations (backport `#52 <https://github.com/ros-visualization/rqt_publisher/issues/52>`_) (`#53 <https://github.com/ros-visualization/rqt_publisher/issues/53>`_)
+* Contributors: mergify[bot]
+
 1.9.0 (2024-12-20)
 ------------------
 * Add in the remaining standard ament_python tests. (`#49 <https://github.com/ros-visualization/rqt_publisher/issues/49>`_)
