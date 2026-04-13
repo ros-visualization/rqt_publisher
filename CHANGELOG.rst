@@ -2,6 +2,11 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.10.2 (2026-04-12)
+-------------------
+* Support Qt6 (`#56 <https://github.com/ros-visualization/rqt_publisher/issues/56>`_)
+* Contributors: Alejandro Hernández Cordero
+
 1.10.1 (2025-07-30)
 -------------------
 * fix setuptools deprecations (`#52 <https://github.com/ros-visualization/rqt_publisher/issues/52>`_)
