@@ -2,6 +2,11 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.0 (2026-05-06)
+-------------------
+* fix flake8 (`#57 <https://github.com/ros-visualization/rqt_publisher/issues/57>`_)
+* Contributors: Alejandro Hernández Cordero
+
 1.10.2 (2026-04-12)
 -------------------
 * Support Qt6 (`#56 <https://github.com/ros-visualization/rqt_publisher/issues/56>`_)
