@@ -342,8 +342,6 @@ class Publisher(Plugin):
         return self._node.get_clock().now().to_msg()
 
     def _evaluate_expression(self, expression, slot_type):
-        global _list_types
-        global _numeric_types
         successful_eval = True
         try:
             # try to evaluate expression
@@ -383,7 +381,6 @@ class Publisher(Plugin):
         return False, None
 
     def _fill_message_slots(self, message, topic_name, expressions, counter):
-        global _list_types
         if topic_name in expressions and len(expressions[topic_name]) > 0:
             # get type
             if hasattr(message, '_type'):
