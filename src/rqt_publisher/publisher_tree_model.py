@@ -42,7 +42,7 @@ class PublisherTreeModel(MessageTreeModel):
     item_value_changed = Signal(int, str, str, str, object)
 
     def __init__(self, parent=None):
-        super(PublisherTreeModel, self).__init__(parent)
+        super().__init__(parent)
         self._column_index = {}
         for column_name in self._column_names:
             self._column_index[column_name] = len(self._column_index)
@@ -52,7 +52,7 @@ class PublisherTreeModel(MessageTreeModel):
         self.itemChanged.connect(self.handle_item_changed)
 
     def clear(self):
-        super(PublisherTreeModel, self).clear()
+        super().clear()
         self.setHorizontalHeaderLabels(self._column_names)
 
     def get_publisher_ids(self, index_list):
@@ -128,8 +128,10 @@ class PublisherTreeModel(MessageTreeModel):
                 expression_item)
 
     def _recursive_create_items(
-            self, parent, slot, slot_name, slot_type_name, slot_path, expressions={}, **kwargs):
-        row, is_leaf_node = super(PublisherTreeModel, self)._recursive_create_items(
+            self, parent, slot, slot_name, slot_type_name, slot_path, expressions=None, **kwargs):
+        if expressions is None:
+            expressions = {}
+        row, is_leaf_node = super()._recursive_create_items(
             parent, slot, slot_name, slot_type_name, slot_path, expressions=expressions, **kwargs)
         if is_leaf_node:
             expression_text = expressions.get(slot_path, repr(slot))
@@ -137,7 +139,7 @@ class PublisherTreeModel(MessageTreeModel):
         return row
 
     def flags(self, index):
-        flags = super(PublisherTreeModel, self).flags(index)
+        flags = super().flags(index)
         if (
             index.column() == self._column_index['expression'] and
             index.model().data(
@@ -147,7 +149,7 @@ class PublisherTreeModel(MessageTreeModel):
                     index.parent()),
                 Qt.ItemDataRole.DisplayRole) == 'bool'
         ):
-            flags |= Qt.ItemIsUserCheckable
+            flags |= Qt.ItemFlag.ItemIsUserCheckable
         return flags
 
     def data(self, index, role):
@@ -160,7 +162,7 @@ class PublisherTreeModel(MessageTreeModel):
                     index.parent()),
                 Qt.ItemDataRole.DisplayRole) == 'bool'
         ):
-            if role == Qt.CheckStateRole:
+            if role == Qt.ItemDataRole.CheckStateRole:
                 value = \
                     index.model().data(
                         index.model().index(
@@ -170,19 +172,19 @@ class PublisherTreeModel(MessageTreeModel):
                 if value == 'True':
                     return Qt.CheckState.Checked
                 if value == 'False':
-                    return Qt.Unchecked
-                return Qt.PartiallyChecked
-        return super(PublisherTreeModel, self).data(index, role)
+                    return Qt.CheckState.Unchecked
+                return Qt.CheckState.PartiallyChecked
+        return super().data(index, role)
 
     def setData(self, index, value, role):
         if (
-            index.column() == index.column() == self._column_index['expression'] and
+            index.column() == self._column_index['expression'] and
             index.model().data(
                 index.model().index(
                     index.row(), self._column_index['type'], index.parent()),
                 Qt.ItemDataRole.DisplayRole) == 'bool'
         ):
-            if role == Qt.CheckStateRole:
+            if role == Qt.ItemDataRole.CheckStateRole:
                 value = str(value == Qt.CheckState.Checked)
-                return QStandardItemModel.setData(self, index, value, Qt.EditRole)
+                return QStandardItemModel.setData(self, index, value, Qt.ItemDataRole.EditRole)
         return QStandardItemModel.setData(self, index, value, role)
