@@ -47,7 +47,7 @@ class PublisherTreeWidget(MessageTreeWidget):
     publish_once = Signal(int)
 
     def __init__(self, parent=None):
-        super(PublisherTreeWidget, self).__init__(parent)
+        super().__init__(parent)
         self.setModel(PublisherTreeModel(self))
         self._action_remove_publisher = QAction(
             QIcon.fromTheme('list-remove'), 'Remove Selected', self)
@@ -70,7 +70,7 @@ class PublisherTreeWidget(MessageTreeWidget):
             menu.addAction(self._action_remove_publisher)
             menu.addAction(self._action_publish_once)
         # let super class add actions
-        super(PublisherTreeWidget, self)._context_menu_add_actions(menu, pos)
+        super()._context_menu_add_actions(menu, pos)
 
     def _handle_action_remove_publisher(self, checked):
         self.remove_selected_publishers()

@@ -57,7 +57,7 @@ class PublisherWidget(QWidget):
     clean_up_publishers = Signal()
 
     def __init__(self, node, parent=None):
-        super(PublisherWidget, self).__init__(parent)
+        super().__init__(parent)
         self._node = node
         self._topic_dict = {}
         self._update_thread = WorkerThread(self._update_thread_run, self._update_finished)
@@ -102,7 +102,7 @@ class PublisherWidget(QWidget):
         https://github.com/ros2/ros2cli/blob/master/ros2msg/ros2msg/api/__init__.py
         """
         if not has_resource('packages', package_name):
-            raise LookupError('Unknown package name "{}"'.format(package_name))
+            raise LookupError(f'Unknown package name "{package_name}"')
         try:
             content, _ = get_resource('rosidl_interfaces', package_name)
         except LookupError:
