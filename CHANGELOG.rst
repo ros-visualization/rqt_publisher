@@ -2,6 +2,11 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.10.4 (2026-06-16)
+-------------------
+* Use logger.warning(), f-string , super() and Qt6 fixes (backport `#59 <https://github.com/ros-visualization/rqt_publisher/issues/59>`_) (`#60 <https://github.com/ros-visualization/rqt_publisher/issues/60>`_)
+* Contributors: mergify[bot]
+
 1.10.3 (2026-05-06)
 -------------------
 * fix flake8 (backport `#57 <https://github.com/ros-visualization/rqt_publisher/issues/57>`_) (`#58 <https://github.com/ros-visualization/rqt_publisher/issues/58>`_)
