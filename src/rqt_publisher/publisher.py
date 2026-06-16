@@ -47,9 +47,11 @@ from rqt_py_common.topic_helpers import get_slot_type
 from .publisher_widget import PublisherWidget
 
 _list_types = [list, tuple, array.array]
+_numpy_ndarray = None
 try:
     import numpy
     _list_types.append(numpy.ndarray)
+    _numpy_ndarray = numpy.ndarray
 except ImportError:
     pass
 
@@ -67,7 +69,7 @@ except ImportError:
 class Publisher(Plugin):
 
     def __init__(self, context):
-        super(Publisher, self).__init__(context)
+        super().__init__(context)
         self.setObjectName('Publisher')
 
         self._node = context.node
@@ -81,7 +83,7 @@ class Publisher(Plugin):
         self._widget.clean_up_publishers.connect(self.clean_up_publishers)
         if context.serial_number() > 1:
             self._widget.setWindowTitle(
-                self._widget.windowTitle() + (' (%d)' % context.serial_number()))
+                self._widget.windowTitle() + f' ({context.serial_number()})')
 
         # create context for the expression eval statement
         self._eval_locals = {'i': 0}
@@ -132,7 +134,7 @@ class Publisher(Plugin):
         msg_module = get_message(publisher_info['type_name'])
         if not msg_module:
             raise RuntimeError(
-                'The passed message type "{}" is invalid'.format(publisher_info['type_name']))
+                f"The passed message type \"{publisher_info['type_name']}\" is invalid")
 
         # Topic name provided was relative, remap to node namespace (if it was set)
         if not publisher_info['topic_name'].startswith('/'):
@@ -154,7 +156,7 @@ class Publisher(Plugin):
 
     @Slot(int, str, str, str, object)
     def change_publisher(self, publisher_id, topic_name, column_name, new_value, setter_callback):
-        handler = getattr(self, '_change_publisher_%s' % column_name, None)
+        handler = getattr(self, f'_change_publisher_{column_name}', None)
         if handler is not None:
             new_text = handler(self._publishers[publisher_id], topic_name, new_value)
             if new_text is not None:
@@ -182,7 +184,7 @@ class Publisher(Plugin):
 
         # restore type if user value was invalid
         if field_value is None:
-            qWarning('Publisher._change_publisher_type(): could not find type: %s' % (type_name))
+            qWarning(f'Publisher._change_publisher_type(): could not find type: {type_name}')
             return parent_field.get_fields_and_field_types()[field_name]
 
         else:
@@ -196,8 +198,8 @@ class Publisher(Plugin):
         try:
             rate = float(new_value)
         except Exception:
-            qWarning('Publisher._change_publisher_rate(): could not parse rate value: %s' %
-                     (new_value))
+            qWarning(
+                f'Publisher._change_publisher_rate(): could not parse rate value: {new_value}')
         else:
             publisher_info['rate'] = rate
             publisher_info['timer'].stop()
@@ -323,8 +325,8 @@ class Publisher(Plugin):
         try:
             base_message_type = get_message(base_type_str)
         except LookupError as e:
-            qWarning('Creating message type {} failed. Please check your spelling and that the '
-                     'message package has been built\n{}'.format(base_type_str, e))
+            qWarning(f'Creating message type {base_type_str} failed. Please check your spelling '
+                     f'and that the message package has been built\n{e}')
             return None
 
         if base_message_type is None:
@@ -350,8 +352,8 @@ class Publisher(Plugin):
             else:
                 value = expression
         except Exception as e:
-            qWarning('Python eval failed for expression "{}"'.format(expression) +
-                     ' with an exception "{}"'.format(e))
+            qWarning(f'Python eval failed for expression "{expression}"' +
+                     f' with an exception "{e}"')
             successful_eval = False
         if slot_type is str:
             if successful_eval:
@@ -369,7 +371,7 @@ class Publisher(Plugin):
             # slot_type
             if type_set <= set(_list_types) or type_set <= set(_numeric_types):
                 # convert to the right type
-                if slot_type is not numpy.ndarray and slot_type is not array.array:
+                if slot_type is not _numpy_ndarray and slot_type is not array.array:
                     value = slot_type(value)
 
         if successful_eval and isinstance(value, slot_type):
@@ -406,7 +408,7 @@ class Publisher(Plugin):
         elif type(message) in _list_types and (len(message) > 0):
             for index, slot in enumerate(message):
                 value = self._fill_message_slots(
-                    slot, topic_name + '[%d]' % index, expressions, counter)
+                    slot, topic_name + f'[{index}]', expressions, counter)
                 # this deals with primitive-type arrays
                 if not hasattr(message[0], '__slots__') and value is not None:
                     message[index] = value
