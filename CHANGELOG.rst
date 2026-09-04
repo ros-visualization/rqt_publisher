@@ -2,6 +2,11 @@
 Changelog for package rqt_publisher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.2 (2026-09-04)
+-------------------
+* Removed Qt5 support (`#61 <https://github.com/ros-visualization/rqt_publisher/issues/61>`_)
+* Contributors: Alejandro Hernández Cordero
+
 2.0.1 (2026-06-16)
 -------------------
 * Use logger.warning(), f-string , super() and Qt6 fixes (`#59 <https://github.com/ros-visualization/rqt_publisher/issues/59>`_)
